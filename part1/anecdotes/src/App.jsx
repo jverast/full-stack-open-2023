@@ -62,16 +62,8 @@ const App = () => {
       <Button onClick={() => handleVoteClick(selected)} text="vote" />
       <Button onClick={handleNextAnecdoteClick} text="next anecdote" />
       <Title title="Anecdote with most votes" />
-      {Object.values(votes).every((vote) => vote === 0) ? (
-        <div>
-          <i>No votes currently. Be the first one.</i>
-        </div>
-      ) : (
-        <>
-          <Anecdote anecdote={anecdotes[findMostVotesAnecdoteIndex()]} />
-          <Votes votes={votes[findMostVotesAnecdoteIndex()]} />
-        </>
-      )}
+      <Anecdote anecdote={anecdotes[findMostVotesAnecdoteIndex()]} />
+      <Votes votes={votes[findMostVotesAnecdoteIndex()]} />
     </>
   )
 }
