@@ -1,13 +1,53 @@
 import { useState } from "react"
 import PropTypes from "prop-types"
 
-const Heading = ({ title }) => <h2>{title}</h2>
-
-const Field = ({ handleChange, value }) => (
-  <input onChange={handleChange} value={value} />
+const Field = ({ handleChange, value, tag }) => (
+  <div>
+    {tag}: <input onChange={handleChange} value={value} />
+  </div>
 )
 
-const Form = ({
+const Person = ({ person }) => (
+  <div>
+    {person.name} {person.number}
+  </div>
+)
+
+const Persons = ({ persons }) => {
+  return (
+    <div>
+      {persons.map((person) => (
+        <Person key={person.id} person={person} />
+      ))}
+    </div>
+  )
+}
+
+const Filter = ({ persons, filter, handleFilterChange }) => {
+  const filtered = persons.filter((person) =>
+    person.name.toLowerCase().includes(filter.toLowerCase())
+  )
+
+  return (
+    <>
+      <Field
+        handleChange={({ target }) => handleFilterChange(target.value)}
+        value={filter}
+        tag="filter shown with"
+      />
+      {filter && (
+        <>
+          <br />
+          <Persons persons={filtered} />
+        </>
+      )}
+    </>
+  )
+}
+
+const Button = ({ type, text }) => <button type={type}>{text}</button>
+
+const PersonForm = ({
   handleSubmit,
   handleNameChange,
   handleNumberChange,
@@ -16,42 +56,44 @@ const Form = ({
 }) => {
   return (
     <form onSubmit={handleSubmit}>
+      <Field
+        handleChange={({ target }) => handleNameChange(target.value)}
+        value={newName}
+        tag="name"
+      />
+      <Field
+        handleChange={({ target }) => handleNumberChange(target.value)}
+        value={newNumber}
+        tag="number"
+      />
       <div>
-        name:{" "}
-        <Field
-          handleChange={({ target }) => handleNameChange(target.value)}
-          value={newName}
-        />
-      </div>
-      <div>
-        number:{" "}
-        <Field
-          handleChange={({ target }) => handleNumberChange(target.value)}
-          value={newNumber}
-        />
-      </div>
-      <div>
-        <button type="submit">add</button>
+        <Button type="submit" text="add" />
       </div>
     </form>
   )
 }
 
-const Person = ({ person }) => (
-  <div>
-    {person.name} {person.number}
-  </div>
-)
+const Heading = ({ title, isSubtitle = false }) => {
+  if (!isSubtitle) {
+    return <h2>{title}</h2>
+  }
+  return <h3>{title}</h3>
+}
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456" }
+    { name: "Arto Hellas", number: "040-123456", id: 1 },
+    { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
+    { name: "Dan Abramov", number: "12-43-234345", id: 3 },
+    { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 }
   ])
   const [newName, setNewName] = useState("")
   const [newNumber, setNewNumber] = useState("")
+  const [filter, setFilter] = useState("")
 
   const handleNameChange = (value) => setNewName(value)
   const handleNumberChange = (value) => setNewNumber(value)
+  const handleFilterChange = (value) => setFilter(value)
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -66,7 +108,10 @@ const App = () => {
 
     // Avoid duplicate name fields
     if (!namesToArray.includes(newName)) {
-      setPersons([...persons, { name: newName, number: newNumber }])
+      setPersons([
+        ...persons,
+        { name: newName, number: newNumber, id: persons.length + 1 }
+      ])
       setNewName("")
       setNewNumber("")
     } else {
@@ -77,17 +122,21 @@ const App = () => {
   return (
     <div>
       <Heading title="Phonebook" />
-      <Form
+      <Filter
+        handleFilterChange={handleFilterChange}
+        filter={filter}
+        persons={persons}
+      />
+      <Heading title="Add a new" isSubtitle />
+      <PersonForm
         handleSubmit={handleSubmit}
         handleNameChange={handleNameChange}
         handleNumberChange={handleNumberChange}
         newName={newName}
         newNumber={newNumber}
       />
-      <Heading title="Numbers" />
-      {persons.map((person) => (
-        <Person key={person.name} person={person} />
-      ))}
+      <Heading title="Numbers" isSubtitle />
+      <Persons persons={persons} />
     </div>
   )
 }
@@ -97,15 +146,32 @@ export default App
 // Typechecking with PropTypes
 
 Heading.propTypes = {
-  title: PropTypes.string
+  title: PropTypes.string,
+  isSubtitle: PropTypes.bool
 }
 
 Field.propTypes = {
   handleChange: PropTypes.func,
-  value: PropTypes.string
+  value: PropTypes.string,
+  tag: PropTypes.string
 }
 
-Form.propTypes = {
+Persons.propTypes = {
+  persons: PropTypes.array
+}
+
+Filter.propTypes = {
+  persons: PropTypes.array,
+  filter: PropTypes.string,
+  handleFilterChange: PropTypes.func
+}
+
+Button.propTypes = {
+  type: PropTypes.string,
+  text: PropTypes.string
+}
+
+PersonForm.propTypes = {
   handleSubmit: PropTypes.func,
   handleNameChange: PropTypes.func,
   handleNumberChange: PropTypes.func,
