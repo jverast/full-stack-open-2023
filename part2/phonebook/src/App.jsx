@@ -3,11 +3,32 @@ import PropTypes from "prop-types"
 
 const Heading = ({ title }) => <h2>{title}</h2>
 
-const Form = ({ handleSubmit, handleChange, newName }) => {
+const Field = ({ handleChange, value }) => (
+  <input onChange={handleChange} value={value} />
+)
+
+const Form = ({
+  handleSubmit,
+  handleNameChange,
+  handleNumberChange,
+  newName,
+  newNumber
+}) => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        name: <input value={newName} onChange={handleChange} />
+        name:{" "}
+        <Field
+          handleChange={({ target }) => handleNameChange(target.value)}
+          value={newName}
+        />
+      </div>
+      <div>
+        number:{" "}
+        <Field
+          handleChange={({ target }) => handleNumberChange(target.value)}
+          value={newNumber}
+        />
       </div>
       <div>
         <button type="submit">add</button>
@@ -16,15 +37,22 @@ const Form = ({ handleSubmit, handleChange, newName }) => {
   )
 }
 
-const Person = ({ person }) => {
-  return <div>{person.name}</div>
-}
+const Person = ({ person }) => (
+  <div>
+    {person.name} {person.number}
+  </div>
+)
 
 const App = () => {
-  const [persons, setPersons] = useState([{ name: "Arto Hellas" }])
+  const [persons, setPersons] = useState([
+    { name: "Arto Hellas", number: "040-123456" }
+  ])
   const [newName, setNewName] = useState("")
+  const [newNumber, setNewNumber] = useState("")
 
-  const handleChange = ({ target }) => setNewName(target.value)
+  const handleNameChange = (value) => setNewName(value)
+  const handleNumberChange = (value) => setNewNumber(value)
+
   const handleSubmit = (event) => {
     event.preventDefault()
 
@@ -33,13 +61,14 @@ const App = () => {
       []
     )
 
-    // Prevent addition of empty names
-    if (!newName) return
+    // Prevent addition of empty fields
+    if (!newName || !newNumber) return
 
-    // Prevent duplications
+    // Avoid duplicate name fields
     if (!namesToArray.includes(newName)) {
-      setPersons([...persons, { name: newName }])
+      setPersons([...persons, { name: newName, number: newNumber }])
       setNewName("")
+      setNewNumber("")
     } else {
       alert(`${newName} is already added to phonebook`)
     }
@@ -50,8 +79,10 @@ const App = () => {
       <Heading title="Phonebook" />
       <Form
         handleSubmit={handleSubmit}
-        handleChange={handleChange}
+        handleNameChange={handleNameChange}
+        handleNumberChange={handleNumberChange}
         newName={newName}
+        newNumber={newNumber}
       />
       <Heading title="Numbers" />
       {persons.map((person) => (
@@ -69,10 +100,17 @@ Heading.propTypes = {
   title: PropTypes.string
 }
 
+Field.propTypes = {
+  handleChange: PropTypes.func,
+  value: PropTypes.string
+}
+
 Form.propTypes = {
   handleSubmit: PropTypes.func,
-  handleChange: PropTypes.func,
-  newName: PropTypes.string
+  handleNameChange: PropTypes.func,
+  handleNumberChange: PropTypes.func,
+  newName: PropTypes.string,
+  newNumber: PropTypes.string
 }
 
 Person.propTypes = {
