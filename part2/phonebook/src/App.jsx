@@ -27,10 +27,21 @@ const App = () => {
   const handleChange = ({ target }) => setNewName(target.value)
   const handleSubmit = (event) => {
     event.preventDefault()
+
+    const namesToArray = persons.reduce(
+      (arr, person) => arr.concat(person.name),
+      []
+    )
+
     // Prevent addition of empty names
-    if (newName) {
+    if (!newName) return
+
+    // Prevent duplications
+    if (!namesToArray.includes(newName)) {
       setPersons([...persons, { name: newName }])
       setNewName("")
+    } else {
+      alert(`${newName} is already added to phonebook`)
     }
   }
 
