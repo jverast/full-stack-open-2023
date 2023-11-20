@@ -4,21 +4,43 @@ import personService from "./services/persons"
 
 const Field = ({ handleChange, value, tag }) => (
   <div>
-    {tag}: <input onChange={handleChange} value={value} />
+    {tag}: <input onChange={handleChange} value={value} name={tag} />
   </div>
 )
 
-const Person = ({ person }) => (
-  <div>
-    {person.name} {person.number}
-  </div>
+const Button = ({ type, text, deletePerson = null }) => (
+  <button type={type} onClick={deletePerson}>
+    {text}
+  </button>
 )
 
-const Persons = ({ persons }) => {
+const Person = ({ person, onlyRead, deletePerson }) => {
+  return (
+    <>
+      {onlyRead ? (
+        <div>
+          {person.name} {person.number}
+        </div>
+      ) : (
+        <div>
+          {person.name} {person.number}{" "}
+          <Button type="button" text="delete" deletePerson={deletePerson} />
+        </div>
+      )}
+    </>
+  )
+}
+
+const Persons = ({ persons, onlyRead = false, deletePerson }) => {
   return (
     <div>
       {persons.map((person) => (
-        <Person key={person.id} person={person} />
+        <Person
+          key={person.id}
+          person={person}
+          onlyRead={onlyRead}
+          deletePerson={() => deletePerson(person.id)}
+        />
       ))}
     </div>
   )
@@ -39,14 +61,12 @@ const Filter = ({ persons, searchTerm, handleFilterChange }) => {
       {searchTerm && (
         <>
           <br />
-          <Persons persons={filtered} />
+          <Persons persons={filtered} onlyRead={true} />
         </>
       )}
     </>
   )
 }
-
-const Button = ({ type, text }) => <button type={type}>{text}</button>
 
 const PersonForm = ({
   addPerson,
@@ -93,7 +113,6 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-
     const namesToArray = persons.reduce(
       (arr, person) => arr.concat(person.name),
       []
@@ -118,6 +137,22 @@ const App = () => {
     } else {
       alert(`${newName} is already added to phonebook`)
     }
+
+    event.target.name.focus()
+  }
+
+  const deletePerson = (id) => {
+    const confirmAction = confirm(
+      `Delete ${persons.find((person) => person.id === id).name} ?`
+    )
+
+    if (confirmAction) {
+      personService
+        .del(id)
+        .then(() => console.log(`person was successfully deleted`))
+
+      setPersons(persons.filter((person) => person.id !== id))
+    }
   }
 
   useEffect(() => {
@@ -141,7 +176,7 @@ const App = () => {
         newNumber={newNumber}
       />
       <Heading title="Numbers" isSubtitle />
-      <Persons persons={persons} />
+      <Persons persons={persons} deletePerson={deletePerson} />
     </div>
   )
 }
@@ -162,7 +197,9 @@ Field.propTypes = {
 }
 
 Persons.propTypes = {
-  persons: PropTypes.array
+  persons: PropTypes.array,
+  onlyRead: PropTypes.bool,
+  deletePerson: PropTypes.func
 }
 
 Filter.propTypes = {
@@ -173,7 +210,8 @@ Filter.propTypes = {
 
 Button.propTypes = {
   type: PropTypes.string,
-  text: PropTypes.string
+  text: PropTypes.string,
+  deletePerson: PropTypes.func
 }
 
 PersonForm.propTypes = {
@@ -185,5 +223,7 @@ PersonForm.propTypes = {
 }
 
 Person.propTypes = {
-  person: PropTypes.object
+  person: PropTypes.object,
+  onlyRead: PropTypes.bool,
+  deletePerson: PropTypes.func
 }
