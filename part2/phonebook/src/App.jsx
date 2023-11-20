@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import PropTypes from "prop-types"
+import axios from "axios"
 
 const Field = ({ handleChange, value, tag }) => (
   <div>
@@ -48,14 +49,14 @@ const Filter = ({ persons, filter, handleFilterChange }) => {
 const Button = ({ type, text }) => <button type={type}>{text}</button>
 
 const PersonForm = ({
-  handleSubmit,
+  addPerson,
   handleNameChange,
   handleNumberChange,
   newName,
   newNumber
 }) => {
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={addPerson}>
       <Field
         handleChange={({ target }) => handleNameChange(target.value)}
         value={newName}
@@ -81,12 +82,7 @@ const Heading = ({ title, isSubtitle = false }) => {
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456", id: 1 },
-    { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
-    { name: "Dan Abramov", number: "12-43-234345", id: 3 },
-    { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState("")
   const [newNumber, setNewNumber] = useState("")
   const [filter, setFilter] = useState("")
@@ -95,7 +91,7 @@ const App = () => {
   const handleNumberChange = (value) => setNewNumber(value)
   const handleFilterChange = (value) => setFilter(value)
 
-  const handleSubmit = (event) => {
+  const addPerson = (event) => {
     event.preventDefault()
 
     const namesToArray = persons.reduce(
@@ -119,6 +115,12 @@ const App = () => {
     }
   }
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/persons")
+      .then((response) => setPersons(response.data))
+  }, [])
+
   return (
     <div>
       <Heading title="Phonebook" />
@@ -129,7 +131,7 @@ const App = () => {
       />
       <Heading title="Add a new" isSubtitle />
       <PersonForm
-        handleSubmit={handleSubmit}
+        addPerson={addPerson}
         handleNameChange={handleNameChange}
         handleNumberChange={handleNumberChange}
         newName={newName}
@@ -172,7 +174,7 @@ Button.propTypes = {
 }
 
 PersonForm.propTypes = {
-  handleSubmit: PropTypes.func,
+  addPerson: PropTypes.func,
   handleNameChange: PropTypes.func,
   handleNumberChange: PropTypes.func,
   newName: PropTypes.string,
