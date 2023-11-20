@@ -8,6 +8,23 @@ const Field = ({ handleChange, value, tag }) => (
   </div>
 )
 
+const Notification = ({ message }) => {
+  if (!message) return
+  return (
+    <>
+      {message.variant === "success" ? (
+        <div className="message" style={{ color: "green" }}>
+          {message.text}
+        </div>
+      ) : (
+        <div className="message" style={{ color: "red" }}>
+          {message.text}
+        </div>
+      )}
+    </>
+  )
+}
+
 const Button = ({ type, text, deletePerson = null }) => (
   <button type={type} onClick={deletePerson}>
     {text}
@@ -106,6 +123,7 @@ const App = () => {
   const [newName, setNewName] = useState("")
   const [newNumber, setNewNumber] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
+  const [message, setMessage] = useState(null)
 
   const handleNameChange = (value) => setNewName(value)
   const handleNumberChange = (value) => setNewNumber(value)
@@ -128,9 +146,16 @@ const App = () => {
         number: newNumber
       }
 
-      personService
-        .create(personObject)
-        .then((returnedPerson) => setPersons([...persons, returnedPerson]))
+      personService.create(personObject).then((returnedPerson) => {
+        setPersons([...persons, returnedPerson])
+        setMessage({
+          text: `Added ${returnedPerson.name}`,
+          variant: "success"
+        })
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+      })
 
       setNewName("")
       setNewNumber("")
@@ -158,6 +183,16 @@ const App = () => {
               )
             )
           )
+          .catch(() => {
+            setMessage({
+              text: `Information of ${newName} has already been removed from server`,
+              variant: "error"
+            })
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+            setPersons(persons.filter((person) => person.id !== id))
+          })
 
         setNewName("")
         setNewNumber("")
@@ -190,6 +225,7 @@ const App = () => {
   return (
     <div>
       <Heading title="Phonebook" />
+      <Notification message={message} />
       <Filter
         handleFilterChange={handleFilterChange}
         searchTerm={searchTerm}
@@ -254,4 +290,8 @@ Person.propTypes = {
   person: PropTypes.object,
   onlyRead: PropTypes.bool,
   deletePerson: PropTypes.func
+}
+
+Notification.propTypes = {
+  message: PropTypes.object
 }
