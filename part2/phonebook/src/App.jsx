@@ -135,9 +135,37 @@ const App = () => {
       setNewName("")
       setNewNumber("")
     } else {
-      alert(`${newName} is already added to phonebook`)
-    }
+      const confirmAction = confirm(
+        `${newName} is already added to phonebook, replace the old number with a new one?`
+      )
 
+      if (confirmAction) {
+        const id = persons.find(
+          (person) => person.name.toLowerCase() === newName.toLowerCase()
+        ).id
+
+        const personObject = {
+          name: newName,
+          number: newNumber
+        }
+
+        personService
+          .update(id, personObject)
+          .then((returnedPerson) =>
+            setPersons(
+              persons.map((person) =>
+                person.id === id ? returnedPerson : person
+              )
+            )
+          )
+
+        setNewName("")
+        setNewNumber("")
+      } else {
+        event.target.number.focus()
+        return
+      }
+    }
     event.target.name.focus()
   }
 
