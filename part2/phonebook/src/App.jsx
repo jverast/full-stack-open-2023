@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import PropTypes from "prop-types"
-import axios from "axios"
+import personService from "./services/persons"
 
 const Field = ({ handleChange, value, tag }) => (
   <div>
@@ -24,19 +24,19 @@ const Persons = ({ persons }) => {
   )
 }
 
-const Filter = ({ persons, filter, handleFilterChange }) => {
+const Filter = ({ persons, searchTerm, handleFilterChange }) => {
   const filtered = persons.filter((person) =>
-    person.name.toLowerCase().includes(filter.toLowerCase())
+    person.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <>
       <Field
         handleChange={({ target }) => handleFilterChange(target.value)}
-        value={filter}
+        value={searchTerm}
         tag="filter shown with"
       />
-      {filter && (
+      {searchTerm && (
         <>
           <br />
           <Persons persons={filtered} />
@@ -85,11 +85,11 @@ const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState("")
   const [newNumber, setNewNumber] = useState("")
-  const [filter, setFilter] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
 
   const handleNameChange = (value) => setNewName(value)
   const handleNumberChange = (value) => setNewNumber(value)
-  const handleFilterChange = (value) => setFilter(value)
+  const handleFilterChange = (value) => setSearchTerm(value)
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -104,10 +104,15 @@ const App = () => {
 
     // Avoid duplicate name fields
     if (!namesToArray.includes(newName)) {
-      setPersons([
-        ...persons,
-        { name: newName, number: newNumber, id: persons.length + 1 }
-      ])
+      const personObject = {
+        name: newName,
+        number: newNumber
+      }
+
+      personService
+        .create(personObject)
+        .then((returnedPerson) => setPersons([...persons, returnedPerson]))
+
       setNewName("")
       setNewNumber("")
     } else {
@@ -116,9 +121,7 @@ const App = () => {
   }
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => setPersons(response.data))
+    personService.getAll().then((initialPersons) => setPersons(initialPersons))
   }, [])
 
   return (
@@ -126,7 +129,7 @@ const App = () => {
       <Heading title="Phonebook" />
       <Filter
         handleFilterChange={handleFilterChange}
-        filter={filter}
+        searchTerm={searchTerm}
         persons={persons}
       />
       <Heading title="Add a new" isSubtitle />
@@ -164,7 +167,7 @@ Persons.propTypes = {
 
 Filter.propTypes = {
   persons: PropTypes.array,
-  filter: PropTypes.string,
+  searchTerm: PropTypes.string,
   handleFilterChange: PropTypes.func
 }
 
