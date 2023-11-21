@@ -2,54 +2,52 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import PropTypes from "prop-types"
 
-const List = ({ collection, isItemized = true }) => {
-  return (
-    <>
-      {isItemized ? (
-        <ul>
-          {collection.map((element) => (
-            <li key={element}>{element}</li>
-          ))}
-        </ul>
-      ) : (
-        <div>
-          {collection.map((element) => (
-            <div key={element}>{element}</div>
-          ))}
-        </div>
-      )}
-    </>
-  )
-}
-
-const CountryFilteredInner = ({ country }) => {
+const Country = ({ country }) => {
   return (
     <div>
       <h2>{country.name.common}</h2>
       <div>capital {country.capital}</div>
       <div>area {country.area}</div>
       <h3>languages:</h3>
-      <List collection={Object.values(country.languages)} />
+      <ul>
+        {Object.values(country.languages).map((element) => (
+          <li key={element}>{element}</li>
+        ))}
+      </ul>
       <br />
       <img src={country.flags.png} alt={country.name.common} />
     </div>
   )
 }
 
-const CountriesFiltered = ({ filtered, country }) => {
+const Countries = ({ filtered, country, getCountry }) => {
+  if (filtered && country) return <Country country={country} />
   return (
     <>
       {filtered &&
         (filtered.length > 10 ? (
           <div>Too many matches, specify another filter</div>
         ) : filtered.length > 1 ? (
-          <List collection={filtered} isItemized={false} />
+          <div>
+            {filtered.map((country) => (
+              <div key={country}>
+                {country}{" "}
+                <button onClick={() => getCountry(country)}>show</button>
+              </div>
+            ))}
+          </div>
         ) : (
-          <>{country && <CountryFilteredInner country={country} />}</>
+          <>{country && <Country country={country} />}</>
         ))}
     </>
   )
 }
+
+const Input = ({ search, handleSearchChange, text }) => (
+  <>
+    {text} <input value={search} onChange={handleSearchChange} />
+  </>
+)
 
 const App = () => {
   const [search, setSearch] = useState("")
@@ -57,13 +55,24 @@ const App = () => {
   const [filtered, setFiltered] = useState(null)
   const [country, setCountry] = useState(null)
 
-  const handleChange = ({ target }) => {
+  const handleSearchChange = ({ target }) => {
     setSearch(target.value)
     setFiltered(
       countries.filter((country) =>
         country.toLowerCase().includes(target.value.toLowerCase())
       )
     )
+  }
+
+  const getCountry = (country) => {
+    const url = `https://studies.cs.helsinki.fi/restcountries/api/name/${country}`
+    axios
+      .get(url)
+      .then((response) => {
+        const data = response.data
+        setCountry(data)
+      })
+      .catch((error) => console.log(error))
   }
 
   useEffect(() => {
@@ -82,14 +91,7 @@ const App = () => {
     if (filtered && filtered.length === countries.length) setFiltered(null)
     if (filtered.length === 1) {
       const country = filtered.join()
-      const url = `https://studies.cs.helsinki.fi/restcountries/api/name/${country}`
-      axios
-        .get(url)
-        .then((response) => {
-          const data = response.data
-          setCountry(data)
-        })
-        .catch((error) => console.log(error))
+      getCountry(country)
     } else {
       setCountry(null)
     }
@@ -97,8 +99,16 @@ const App = () => {
 
   return (
     <>
-      find countries <input value={search} onChange={handleChange} />
-      <CountriesFiltered filtered={filtered} country={country} />
+      <Input
+        search={search}
+        handleSearchChange={handleSearchChange}
+        text="find countries"
+      />
+      <Countries
+        filtered={filtered}
+        country={country}
+        getCountry={getCountry}
+      />
     </>
   )
 }
@@ -107,16 +117,18 @@ export default App
 
 // Typechecking
 
-CountryFilteredInner.propTypes = {
+Input.propTypes = {
+  search: PropTypes.string,
+  handleSearchChange: PropTypes.func,
+  text: PropTypes.string
+}
+
+Country.propTypes = {
   country: PropTypes.object
 }
 
-CountriesFiltered.propTypes = {
+Countries.propTypes = {
   filtered: PropTypes.array,
-  country: PropTypes.object
-}
-
-List.propTypes = {
-  collection: PropTypes.array,
-  isItemized: PropTypes.bool
+  country: PropTypes.object,
+  getCountry: PropTypes.func
 }
