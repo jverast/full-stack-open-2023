@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react"
-import personService from "./services/persons"
-import Heading from "./components/Heading"
-import Notification from "./components/Notification"
-import Filter from "./components/Filter"
-import PersonForm from "./components/PersonForm"
-import Persons from "./components/Persons"
+import { useEffect, useState } from 'react'
+import personService from './services/persons'
+import Heading from './components/Heading'
+import Notification from './components/Notification'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
-  const [newName, setNewName] = useState("")
-  const [newNumber, setNewNumber] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [message, setMessage] = useState(null)
 
   const handleNameChange = (value) => setNewName(value)
@@ -24,29 +24,36 @@ const App = () => {
       []
     )
 
-    // Prevent addition of empty fields
-    if (!newName || !newNumber) return
-
-    // Avoid duplicate name fields
     if (!namesToArray.includes(newName)) {
       const personObject = {
         name: newName,
         number: newNumber
       }
 
-      personService.create(personObject).then((returnedPerson) => {
-        setPersons([...persons, returnedPerson])
-        setMessage({
-          text: `Added ${returnedPerson.name}`,
-          variant: "success"
-        })
-        setTimeout(() => {
-          setMessage(null)
-        }, 5000)
-      })
+      personService
+        .create(personObject)
+        .then((returnedPerson) => {
+          setPersons([...persons, returnedPerson])
+          setMessage({
+            text: `Added ${returnedPerson.name}`,
+            variant: 'success'
+          })
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
 
-      setNewName("")
-      setNewNumber("")
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch((err) => {
+          setMessage({
+            text: err.response.data.error,
+            variant: 'error'
+          })
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
+        })
     } else {
       const confirmAction = confirm(
         `${newName} is already added to phonebook, replace the old number with a new one?`
@@ -71,19 +78,16 @@ const App = () => {
               )
             )
           )
-          .catch(() => {
+          .catch((err) => {
             setMessage({
-              text: `Information of ${newName} has already been removed from server`,
-              variant: "error"
+              text: err.response.data.error,
+              variant: 'error'
             })
             setTimeout(() => {
               setMessage(null)
             }, 5000)
             setPersons(persons.filter((person) => person.id !== id))
           })
-
-        setNewName("")
-        setNewNumber("")
       } else {
         event.target.number.focus()
         return

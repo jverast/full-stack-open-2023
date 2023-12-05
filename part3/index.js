@@ -59,14 +59,6 @@ app.delete('/api/persons/:id', (req, res, next) => {
 app.post('/api/persons', (req, res, next) => {
   const { name, number } = req.body
 
-  if (!number) {
-    return res.status(400).json({ error: 'number missing' })
-  }
-
-  if (!name) {
-    return res.status(400).json({ error: 'name missing' })
-  }
-
   const person = new Person({
     name,
     number
@@ -77,15 +69,23 @@ app.post('/api/persons', (req, res, next) => {
     .then((person) => {
       res.status(201).json(person)
     })
-    .then((err) => next(err))
+    .catch((err) => next(err))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
   const body = req.body
 
-  Person.findByIdAndUpdate(req.params.id, body, { new: true })
+  Person.findByIdAndUpdate(req.params.id, body, {
+    new: true,
+    runValidators: true,
+    context: 'query'
+  })
     .then((updatedPerson) => {
-      res.json(updatedPerson)
+      updatedPerson
+        ? res.json(updatedPerson)
+        : res.status(400).json({
+            error: `Information of ${body.name} has already been removed from server`
+          })
     })
     .catch((err) => next(err))
 })
@@ -101,6 +101,10 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'CastError') {
     return res.status(400).json({ error: 'malformatted id' })
+  }
+
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ error: err.message })
   }
 
   next(err)
