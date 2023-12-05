@@ -4,10 +4,10 @@ GET http://localhost:3001/api/persons
 GET http://localhost:3001/info
 
 ###
-GET http://localhost:3001/api/persons/4
+GET http://localhost:3001/api/persons/6565845901dd52b9cc0ce2a7
 
 ###
-DELETE http://localhost:3001/api/persons/4
+DELETE http://localhost:3001/api/persons/656ece330ce4cd049a61a7dd
 
 ###
 POST http://localhost:3001/api/persons
@@ -15,5 +15,14 @@ Content-Type: application/json
 
 {
   "name": "Arda Turan",
+  "number": "014-5555-555"
+}
+
+###
+PUT http://localhost:3001/api/persons/656ece330ce4cd049a61a7dd
+Content-Type: application/json
+
+{
+  "name": "Marcos Cruz",
   "number": "014-5555-555"
 }
