@@ -84,8 +84,8 @@ app.put('/api/persons/:id', (req, res, next) => {
       updatedPerson
         ? res.json(updatedPerson)
         : res.status(400).json({
-            error: `Information of ${body.name} has already been removed from server`
-          })
+          error: `Information of ${body.name} has already been removed from server`
+        })
     })
     .catch((err) => next(err))
 })
