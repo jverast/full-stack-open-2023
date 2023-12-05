@@ -45,10 +45,12 @@ app.use(
   )
 )
 
-app.get('/api/persons', (req, res) => {
-  Person.find({}).then((persons) => {
-    res.json(persons)
-  })
+app.get('/api/persons', (req, res, next) => {
+  Person.find({})
+    .then((persons) => {
+      res.json(persons)
+    })
+    .catch((err) => next(err))
 })
 
 app.get('/info', (req, res) => {
@@ -73,11 +75,13 @@ app.get('/api/persons/:id', (req, res) => {
   res.json(person)
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-  Person.findByIdAndDelete(req.params.id).then(() => res.status(204).end())
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => res.status(204).end())
+    .catch((err) => next(err))
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
   const { name, number } = req.body
 
   if (!number) {
@@ -93,10 +97,26 @@ app.post('/api/persons', (req, res) => {
     number
   })
 
-  person.save().then((person) => {
-    res.status(201).json(person)
-  })
+  person
+    .save()
+    .then((person) => {
+      res.status(201).json(person)
+    })
+    .then((err) => next(err))
 })
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (err, req, res, next) => {
+  console.error(err.message)
+  next(err)
+}
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`App is running on port ${PORT}`)
