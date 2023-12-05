@@ -80,31 +80,25 @@ app.delete('/api/persons/:id', (req, res) => {
   res.status(204).end()
 })
 
-const BOUNDARY = 999999999999,
-  generateId = () => Math.round(Math.random() * BOUNDARY)
-
 app.post('/api/persons', (req, res) => {
-  const body = req.body
+  const { name, number } = req.body
 
-  if (!body.name || !body.number) {
-    res.status(400).json({ error: 'name or number missing' })
-    return
+  if (!number) {
+    return res.status(400).json({ error: 'number missing' })
   }
 
-  const namesArray = persons.map((person) => person.name)
-  if (namesArray.includes(body.name)) {
-    res.status(400).json({ error: 'name must be unique' })
-    return
+  if (!name) {
+    return res.status(400).json({ error: 'name missing' })
   }
 
-  const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number
-  }
+  const person = new Person({
+    name,
+    number
+  })
 
-  persons = persons.concat(person)
-  res.status(201).json(person)
+  person.save().then((person) => {
+    res.status(201).json(person)
+  })
 })
 
 app.listen(PORT, () => {
