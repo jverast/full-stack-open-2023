@@ -1,0 +1,9 @@
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "title": "What's new in ES2023? List of new JavaScript Features",
+  "author": "Mehul Mohan",
+  "url": "https://codedamn.com/news/javascript/es2023-new-features",
+  "likes": 1254
+}
