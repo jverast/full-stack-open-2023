@@ -9,7 +9,6 @@ blogRouter.get('/', (request, response) => {
 })
 
 blogRouter.post('/', (request, response, next) => {
-  logger.info(response)
   const blog = new Blog(request.body)
 
   blog.save().then((result) => {
