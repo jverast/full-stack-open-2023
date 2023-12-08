@@ -1,9 +1,9 @@
-POST http://localhost:3001/api/blogs
+POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-  "title": "What's new in ES2023? List of new JavaScript Features",
-  "author": "Mehul Mohan",
-  "url": "https://codedamn.com/news/javascript/es2023-new-features",
-  "likes": 1254
+  "title": "Augmented reality and virtual reality applications",
+  "author": "telefonica",
+  "url": "https://www.telefonica.com/en/communication-room/blog/augmented-reality-virtual-reality-applications/",
+  "likes": 547
 }
