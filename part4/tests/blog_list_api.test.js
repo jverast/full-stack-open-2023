@@ -46,6 +46,17 @@ test('a valid blog can be added', async () => {
   expect(response.body).toEqual({ ...newBlog, id: response.body.id })
 })
 
+test('likes property is missing', async () => {
+  const newBlog = {
+    title: 'Type wars',
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
+  }
+
+  const response = await api.post('/api/blogs').send(newBlog)
+  expect(response.body.likes).toBeDefined()
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })

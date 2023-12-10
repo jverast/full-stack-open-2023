@@ -9,7 +9,10 @@ blogRouter.get('/', (request, response) => {
 })
 
 blogRouter.post('/', (request, response, next) => {
-  const blog = new Blog(request.body)
+  const body = request.body
+  body.likes = body.likes ?? 0
+
+  const blog = new Blog(body)
 
   blog.save().then((result) => {
     response.status(201).json(result)
