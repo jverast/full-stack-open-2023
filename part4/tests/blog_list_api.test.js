@@ -23,6 +23,11 @@ test('all notes are returned', async () => {
   expect(response.body).toHaveLength(helper.blogListInitial.length)
 })
 
+test('id is defined in each blog', async () => {
+  const response = await api.get('/api/blogs')
+  response.body.forEach((blog) => expect(blog.id).toBeDefined())
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
