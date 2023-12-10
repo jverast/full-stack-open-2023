@@ -5,6 +5,7 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const blog = require('../models/blog')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
@@ -82,13 +83,32 @@ describe('additon of a new blog', () => {
 
 describe('deletion of a blog', () => {
   test('succeeds with status code 204 if id is valid', async () => {
-    const blogsAtStart = await helper.blogListDb()
-    const blogToDelete = blogsAtStart[0]
+    const blogsAtStart = await helper.blogListDb(),
+      blogToDelete = blogsAtStart[0]
 
     await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
 
     const blogsAtEnd = await helper.blogListDb()
     expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length - 1)
+  })
+})
+
+describe('update a blog', () => {
+  test('succeed in updating the number of likes on a blog', async () => {
+    const blogsAtStart = await helper.blogListDb(),
+      blogToUpdate = blogsAtStart[0]
+
+    const likesToUpdate = { likes: 13 }
+
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(likesToUpdate)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogListDb()
+    expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length)
+    expect(response.body.likes).toBe(likesToUpdate.likes)
   })
 })
 
