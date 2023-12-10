@@ -19,7 +19,10 @@ mongoose
 
 app.use(cors())
 app.use(express.json())
-app.use(middleware.logger)
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(middleware.logger)
+}
 
 app.use('/api/blogs', blogRouter)
 
