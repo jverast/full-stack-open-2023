@@ -53,8 +53,19 @@ test('likes property is missing', async () => {
     url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
   }
 
-  const response = await api.post('/api/blogs').send(newBlog)
+  const response = await api.post('/api/blogs').send(newBlog).expect(201)
   expect(response.body.likes).toBeDefined()
+})
+
+test('title or url properties are missing', async () => {
+  const newBlog = {
+    title: 'Type wars',
+    author: 'Robert C. Martin'
+  }
+
+  const response = await api.post('/api/blogs').send(newBlog).expect(400)
+  expect(response.body.title).toBeDefined()
+  expect(response.body.url).toBeDefined()
 })
 
 afterAll(async () => {
