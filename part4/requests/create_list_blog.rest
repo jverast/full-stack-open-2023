@@ -1,10 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2NTdmYjIzNTFkNDYxMDVkNDVmNDI5OGMiLCJpYXQiOjE3MDMwMjM4MzYsImV4cCI6MTcwMzAyMzg5Nn0.z_plrZPGiMvssstGXmkili7NRv7luhAzK5QoDlJ7a3E
 
 {
   "title": "Type wars",
   "author": "Robert C. Martin",
   "url": "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-  "likes": 2,
-  "userId": "657fb1d61d46105d45f42989"
+  "likes": 2
 }
