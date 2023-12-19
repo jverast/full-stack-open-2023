@@ -1,4 +1,6 @@
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
 
 const blogListInitial = [
   {
@@ -18,6 +20,19 @@ const blogListInitial = [
     author: 'Edsger W. Dijkstra',
     url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
     likes: 12
+  }
+]
+
+const usersInitial = [
+  {
+    username: 'hellas',
+    name: 'Arto Hellas',
+    password: '12345'
+  },
+  {
+    username: 'mluukkai',
+    name: 'Matti Luukkainen',
+    password: 'qwerty'
   }
 ]
 
@@ -41,8 +56,15 @@ const blogListDb = async () => {
   return blogs.map((blog) => blog.toJSON())
 }
 
+const usersDb = async () => {
+  const users = await User.find({})
+  return users.map((user) => user.toJSON())
+}
+
 module.exports = {
   blogListInitial,
   nonExistingId,
-  blogListDb
+  blogListDb,
+  usersInitial,
+  usersDb
 }
