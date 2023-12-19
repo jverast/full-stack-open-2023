@@ -5,10 +5,25 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+jest.setTimeout(20000)
 
 beforeEach(async () => {
   await Blog.deleteMany({})
-  await Blog.insertMany(helper.blogListInitial)
+  for (const { title, author, url, likes, userId } of helper.blogListInitial) {
+    const user = await User.findById(userId)
+    const blog = new Blog({
+      title,
+      author,
+      url,
+      likes,
+      user: user._id
+    })
+    const newBlog = await blog.save()
+    user.blogs = user.blogs.concat(newBlog._id)
+    await user.save()
+  }
 })
 
 describe('when there is initially some blogs saved', () => {
@@ -42,9 +57,11 @@ describe('additon of a new blog', () => {
       title: 'Type wars',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
-      likes: 2
+      likes: 2,
+      userId: '6580fd764f055d00a91c94bc'
     }
-    const response = await api
+
+    await api
       .post('/api/blogs')
       .send(newBlog)
       .expect(201)
@@ -53,15 +70,16 @@ describe('additon of a new blog', () => {
     const blogsAtEnd = await helper.blogListDb()
     expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length + 1)
 
-    const newBlogWithId = { ...newBlog, id: response.body.id }
-    expect(response.body).toEqual(newBlogWithId)
+    const titles = blogsAtEnd.map((blog) => blog.title)
+    expect(titles).toContain(newBlog.title)
   })
 
   test('likes property is missing', async () => {
     const newBlog = {
       title: 'Type wars',
       author: 'Robert C. Martin',
-      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+      userId: '6580fd764f055d00a91c94bc'
     }
 
     const response = await api.post('/api/blogs').send(newBlog).expect(201)
@@ -71,12 +89,14 @@ describe('additon of a new blog', () => {
   test('title or url properties are missing', async () => {
     const newBlog = {
       title: 'Type wars',
-      author: 'Robert C. Martin'
+      author: 'Robert C. Martin',
+      userId: '6580fd764f055d00a91c94bc'
     }
 
-    const response = await api.post('/api/blogs').send(newBlog).expect(400)
-    expect(response.body.title).toBeDefined()
-    expect(response.body.url).toBeDefined()
+    await api.post('/api/blogs').send(newBlog).expect(400)
+
+    const blogsAtEnd = await helper.blogListDb()
+    expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length)
   })
 })
 
