@@ -1,6 +1,6 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
-const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const blogListInitial = [
   {
@@ -64,10 +64,15 @@ const usersDb = async () => {
   return users.map((user) => user.toJSON())
 }
 
+const expirableToken = (userForToken) => {
+  return jwt.sign(userForToken, process.env.SECRET, { expiresIn: 60 })
+}
+
 module.exports = {
   blogListInitial,
   nonExistingId,
   blogListDb,
   usersInitial,
-  usersDb
+  usersDb,
+  expirableToken
 }

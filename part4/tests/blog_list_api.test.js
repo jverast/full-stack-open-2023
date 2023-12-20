@@ -32,22 +32,19 @@ describe('when there is initially some blogs saved', () => {
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
+
+    const blogs = await helper.blogListDb()
+    expect(blogs).toHaveLength(helper.blogListInitial.length)
   })
 
-  test('all blogs are returned', async () => {
-    const response = await api.get('/api/blogs')
-    expect(response.body).toHaveLength(helper.blogListInitial.length)
-  })
-})
-
-describe('viewing a specific blog', () => {
-  test('id is defined', async () => {
+  test('every blog has an id as property', async () => {
     const response = await api
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    expect(response.body[0].id).toBeDefined()
+    const ids = response.body.map((blog) => blog.id)
+    expect(ids).toHaveLength(helper.blogListInitial.length)
   })
 })
 
@@ -57,13 +54,20 @@ describe('additon of a new blog', () => {
       title: 'Type wars',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
-      likes: 2,
-      userId: '6580fd764f055d00a91c94bc'
+      likes: 2
     }
+
+    const token = helper.expirableToken({
+      username: 'hellas',
+      id: '6580fd764f055d00a91c94bc'
+    })
 
     await api
       .post('/api/blogs')
       .send(newBlog)
+      .set({
+        Authorization: `Bearer ${token}`
+      })
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
@@ -74,26 +78,72 @@ describe('additon of a new blog', () => {
     expect(titles).toContain(newBlog.title)
   })
 
-  test('likes property is missing', async () => {
+  test('fails with proper status code if token invalid', async () => {
     const newBlog = {
       title: 'Type wars',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
-      userId: '6580fd764f055d00a91c94bc'
+      likes: 17
     }
 
-    const response = await api.post('/api/blogs').send(newBlog).expect(201)
-    expect(response.body.likes).toBeDefined()
+    const invalidToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpZCI6IjY1ODI0YjliZTJhODIyNmYxMjY3YWYzZSIsImlhdCI6MTcwMzAzNzkwMSwiZXhwIjoxNzAzMDQxNTAxfQ.NgG08goGNV0gEz_GlV9psuwZPWbFv4Lv4CnRKLPUF_k'
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set({
+        Authorization: `Bearer ${invalidToken}`
+      })
+      .expect(401)
+
+    const blogsAtEnd = await helper.blogListDb()
+    expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length)
+
+    const titles = blogsAtEnd.map((blog) => blog.title)
+    expect(titles).not.toContain(newBlog.title)
   })
 
-  test('title or url properties are missing', async () => {
+  test('you can add a blog regardless likes property is defined', async () => {
     const newBlog = {
       title: 'Type wars',
       author: 'Robert C. Martin',
-      userId: '6580fd764f055d00a91c94bc'
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
     }
 
-    await api.post('/api/blogs').send(newBlog).expect(400)
+    const token = helper.expirableToken({
+      username: 'hellas',
+      id: '6580fd764f055d00a91c94bc'
+    })
+
+    const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set({
+        Authorization: `Bearer ${token}`
+      })
+      .expect(201)
+    expect(response.body.likes).toBeDefined()
+  })
+
+  test('fails with status code 400 if title or url property are missing', async () => {
+    const newBlog = {
+      title: 'Type wars',
+      author: 'Robert C. Martin'
+    }
+
+    const token = helper.expirableToken({
+      username: 'hellas',
+      id: '6580fd764f055d00a91c94bc'
+    })
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set({
+        Authorization: `Bearer ${token}`
+      })
+      .expect(400)
 
     const blogsAtEnd = await helper.blogListDb()
     expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length)
@@ -101,11 +151,21 @@ describe('additon of a new blog', () => {
 })
 
 describe('deletion of a blog', () => {
-  test('succeeds with status code 204 if id is valid', async () => {
+  test('succeeds with status code 204 if id and token are valid', async () => {
     const blogsAtStart = await helper.blogListDb(),
       blogToDelete = blogsAtStart[0]
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+    const token = helper.expirableToken({
+      username: 'hellas',
+      id: '6580fd764f055d00a91c94bc'
+    })
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set({
+        Authorization: `Bearer ${token}`
+      })
+      .expect(204)
 
     const blogsAtEnd = await helper.blogListDb()
     expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length - 1)
