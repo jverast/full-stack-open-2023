@@ -173,21 +173,24 @@ describe('deletion of a blog', () => {
 })
 
 describe('update a blog', () => {
-  test('succeed in updating the number of likes on a blog', async () => {
+  test('increase by one the number of likes in a blog', async () => {
     const blogsAtStart = await helper.blogListDb(),
       blogToUpdate = blogsAtStart[0]
 
-    const likesToUpdate = { likes: 13 }
+    const likesIncrementedByOne = {
+      ...blogToUpdate,
+      likes: blogToUpdate.likes + 1
+    }
 
     const response = await api
       .put(`/api/blogs/${blogToUpdate.id}`)
-      .send(likesToUpdate)
+      .send(likesIncrementedByOne)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
     const blogsAtEnd = await helper.blogListDb()
     expect(blogsAtEnd).toHaveLength(helper.blogListInitial.length)
-    expect(response.body.likes).toBe(likesToUpdate.likes)
+    expect(response.body.likes).toBe(blogToUpdate.likes + 1)
   })
 })
 
