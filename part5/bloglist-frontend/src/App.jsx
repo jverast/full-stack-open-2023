@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -11,6 +12,7 @@ const App = () => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+  const [info, setInfo] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -37,7 +39,10 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (error) {
-      console.log(error)
+      setInfo({ message: error.response.data.error, type: 'error' })
+      setTimeout(() => {
+        setInfo(null)
+      }, 5000)
     }
   }
 
@@ -56,8 +61,16 @@ const App = () => {
       setTitle('')
       setAuthor('')
       setUrl('')
+
+      setInfo({ message: `a new blog ${blogReturned.title} added` })
+      setTimeout(() => {
+        setInfo(null)
+      }, 5000)
     } catch (error) {
-      console.log(error)
+      setInfo({ message: error.response.data.error, type: 'error' })
+      setTimeout(() => {
+        setInfo(null)
+      }, 5000)
     }
   }
 
@@ -65,6 +78,7 @@ const App = () => {
     return (
       <>
         <h2>Log in to application</h2>
+        <Notification info={info} />
         <form onSubmit={handleLogin}>
           <div>
             username
@@ -95,6 +109,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+      <Notification info={info} />
       <p>
         {user.name} is logged in{' '}
         <button type="button" onClick={handleLogout}>
