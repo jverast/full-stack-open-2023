@@ -77,6 +77,22 @@ const App = () => {
     }
   }
 
+  const deleteBlog = async (id) => {
+    const blogToDelete = blogs.find((blog) => blog.id === id)
+    const isConfirm = confirm(`remove blog ${blogToDelete.title}`)
+    if (isConfirm) {
+      try {
+        await blogService.remove(id)
+        setBlogs(blogs.filter((blog) => blog.id !== id))
+      } catch (error) {
+        setInfo({ message: error.response.data.error, type: 'error' })
+        setTimeout(() => {
+          setInfo(null)
+        }, 5000)
+      }
+    }
+  }
+
   if (!user) {
     return (
       <>
@@ -126,7 +142,13 @@ const App = () => {
         <BlogForm createBlog={addBlog} />
       </Togglable>
       {sortBlogs().map((blog) => (
-        <Blog key={blog.id} blog={blog} updateBlog={incrementLikes} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateBlog={incrementLikes}
+          removeBlog={deleteBlog}
+          user={user}
+        />
       ))}
     </div>
   )
