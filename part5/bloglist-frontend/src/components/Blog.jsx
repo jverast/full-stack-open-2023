@@ -29,17 +29,25 @@ const Blog = ({ blog, updateBlog, user, removeBlog }) => {
   return (
     <div style={styles}>
       <div>
-        {blog.title}{' '}
-        <button onClick={() => setShowDetails(!showDetails)}>
-          {showDetails ? 'hide' : 'view'}
-        </button>
+        <div className="blog-title">
+          {blog.title}
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="blog-view-btn"
+          >
+            {showDetails ? 'hide' : 'view'}
+          </button>
+        </div>
+        <div className="blog-author">{blog.author}</div>
       </div>
-      <div style={{ display: showDetails ? '' : 'none' }}>
+      <div
+        style={{ display: showDetails ? '' : 'none' }}
+        className="blog-details"
+      >
         <div>{blog.url}</div>
         <div>
           likes {blog.likes} <button onClick={handleLikeClick}>like</button>
         </div>
-        <div>{blog.author}</div>
         {userId === user.id && (
           <button onClick={handleRemoveClick}>remove</button>
         )}
@@ -51,8 +59,8 @@ const Blog = ({ blog, updateBlog, user, removeBlog }) => {
 export default Blog
 
 Blog.propTypes = {
-  updateBlog: PropTypes.func.isRequired,
-  removeBlog: PropTypes.func.isRequired,
-  blog: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired
+  updateBlog: PropTypes.func,
+  removeBlog: PropTypes.func,
+  blog: PropTypes.object,
+  user: PropTypes.object
 }
