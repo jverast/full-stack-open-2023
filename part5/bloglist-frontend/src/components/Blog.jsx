@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 
-const Blog = ({ blog, updateBlog, user, removeBlog }) => {
+const Blog = ({ updateBlog, removeBlog, user, blog }) => {
   const [showDetails, setShowDetails] = useState(false)
 
   const styles = {
@@ -23,6 +23,7 @@ const Blog = ({ blog, updateBlog, user, removeBlog }) => {
     updateBlog(updatedBlog, blog.id)
   }
 
+  const handleShowDetails = () => setShowDetails(!showDetails)
   const handleRemoveClick = () => removeBlog(blog.id)
   const userId = blog.user.id ?? blog.user
 
@@ -31,10 +32,7 @@ const Blog = ({ blog, updateBlog, user, removeBlog }) => {
       <div>
         <div className="blog-title">
           {blog.title}
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="blog-view-btn"
-          >
+          <button onClick={handleShowDetails} className="blog-view-btn">
             {showDetails ? 'hide' : 'view'}
           </button>
         </div>
