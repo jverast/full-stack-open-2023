@@ -1,12 +1,12 @@
 describe('Blog app', function () {
   beforeEach(function () {
-    cy.request('POST', 'http://localhost:3003/api/testing/reset')
-    cy.request('POST', 'http://localhost:3003/api/users', {
+    cy.request('POST', `${Cypress.env('BACKEND')}/testing/reset`)
+    cy.request('POST', `${Cypress.env('BACKEND')}/users`, {
       username: 'mluukkai',
       name: 'Matti Luukkainen',
       password: 'salainen'
     })
-    cy.visit('http://localhost:5173')
+    cy.visit('')
   })
 
   it('login form is shown', function () {
@@ -39,16 +39,10 @@ describe('Blog app', function () {
 
   describe('When logged in', function () {
     beforeEach(function () {
-      cy.request('POST', 'http://localhost:3003/api/login', {
-        username: 'mluukkai',
-        password: 'salainen'
-      }).then(({ body }) => {
-        localStorage.setItem('loggedNoteappUser', JSON.stringify(body))
-        cy.visit('http://localhost:5173')
-      })
+      cy.login({ username: 'mluukkai', password: 'salainen' })
     })
 
-    it.only('A blog can be created', function () {
+    it('A blog can be created', function () {
       cy.contains('create new blog').click()
 
       cy.get('#title').type('React patterns')
@@ -64,6 +58,34 @@ describe('Blog app', function () {
 
       cy.get('.blog-title').should('contain', 'React patterns')
       cy.get('.blog-author').should('contain', 'Michael Chan')
+    })
+
+    describe('and several blog exists', function () {
+      beforeEach(function () {
+        cy.createBlog({
+          title: 'Go To Statement Considered Harmful',
+          author: 'Edsger W. Dijkstra',
+          url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html'
+        })
+        cy.createBlog({
+          title: 'Canonical string reduction',
+          author: 'Edsger W. Dijkstra',
+          url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html'
+        })
+        cy.createBlog({
+          title: 'TDD harms architecture',
+          author: 'Robert C. Martin',
+          url: 'http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html'
+        })
+      })
+
+      it.only('users can like a blog', function () {
+        cy.get('.blog-title:first').parent().parent().as('firstBlog')
+        cy.get('@firstBlog').find('.blog-view-btn').click()
+        cy.get('@firstBlog').find('.blog-like-btn').click()
+
+        cy.get('@firstBlog').should('contain', 'likes 1')
+      })
     })
   })
 })
