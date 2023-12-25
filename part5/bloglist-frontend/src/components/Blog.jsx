@@ -28,7 +28,7 @@ const Blog = ({ updateBlog, removeBlog, user, blog }) => {
   const userId = blog.user.id ?? blog.user
 
   return (
-    <div style={styles}>
+    <div id="blog" style={styles}>
       <div>
         <div className="blog-title">
           {blog.title}

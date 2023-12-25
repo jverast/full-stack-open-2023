@@ -1,4 +1,4 @@
-describe('blog app', function () {
+describe('Blog app', function () {
   beforeEach(function () {
     cy.request('POST', 'http://localhost:3003/api/testing/reset')
     cy.request('POST', 'http://localhost:3003/api/users', {
@@ -34,6 +34,36 @@ describe('blog app', function () {
         .should('contain', 'wrong username or password')
         .and('have.css', 'color', 'rgb(255, 0, 0)')
         .and('have.css', 'border-style', 'solid')
+    })
+  })
+
+  describe('When logged in', function () {
+    beforeEach(function () {
+      cy.request('POST', 'http://localhost:3003/api/login', {
+        username: 'mluukkai',
+        password: 'salainen'
+      }).then(({ body }) => {
+        localStorage.setItem('loggedNoteappUser', JSON.stringify(body))
+        cy.visit('http://localhost:5173')
+      })
+    })
+
+    it.only('A blog can be created', function () {
+      cy.contains('create new blog').click()
+
+      cy.get('#title').type('React patterns')
+      cy.get('#author').type('Michael Chan')
+      cy.get('#url').type('https://reactpatterns.com/')
+
+      cy.get('#submit-button').click()
+
+      cy.get('.info')
+        .should('contain', 'a new blog React patterns added')
+        .and('have.css', 'color', 'rgb(0, 128, 0)')
+        .and('have.css', 'border-style', 'solid')
+
+      cy.get('.blog-title').should('contain', 'React patterns')
+      cy.get('.blog-author').should('contain', 'Michael Chan')
     })
   })
 })
