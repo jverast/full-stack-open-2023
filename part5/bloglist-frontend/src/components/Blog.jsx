@@ -50,7 +50,9 @@ const Blog = ({ updateBlog, removeBlog, user, blog }) => {
           </button>
         </div>
         {userId === user.id && (
-          <button onClick={handleRemoveClick}>remove</button>
+          <button onClick={handleRemoveClick} className="blog-remove-btn">
+            remove
+          </button>
         )}
       </div>
     </div>

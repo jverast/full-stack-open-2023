@@ -6,6 +6,11 @@ describe('Blog app', function () {
       name: 'Matti Luukkainen',
       password: 'salainen'
     })
+    cy.request('POST', `${Cypress.env('BACKEND')}/users`, {
+      username: 'hellas',
+      name: 'Arto Hellas',
+      password: 'salainen'
+    })
     cy.visit('')
   })
 
@@ -42,7 +47,7 @@ describe('Blog app', function () {
       cy.login({ username: 'mluukkai', password: 'salainen' })
     })
 
-    it('A blog can be created', function () {
+    it('a blog can be created', function () {
       cy.contains('create new blog').click()
 
       cy.get('#title').type('React patterns')
@@ -60,7 +65,7 @@ describe('Blog app', function () {
       cy.get('.blog-author').should('contain', 'Michael Chan')
     })
 
-    describe('and several blog exists', function () {
+    describe('And several blog exists', function () {
       beforeEach(function () {
         cy.createBlog({
           title: 'Go To Statement Considered Harmful',
@@ -79,13 +84,27 @@ describe('Blog app', function () {
         })
       })
 
-      it.only('users can like a blog', function () {
+      it('users can like a blog', function () {
         cy.get('.blog-title:first').parent().parent().as('firstBlog')
         cy.get('@firstBlog').find('.blog-view-btn').click()
         cy.get('@firstBlog').find('.blog-like-btn').click()
 
         cy.get('@firstBlog').should('contain', 'likes 1')
       })
+    })
+
+    it.only('user who created a blog can delete it', function () {
+      cy.createBlog({
+        title: 'Type wars',
+        author: 'Robert C. Martin',
+        url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
+      })
+
+      cy.contains('Type wars').parent().parent().as('currentBlog')
+      cy.get('@currentBlog').find('.blog-view-btn').click()
+      cy.get('@currentBlog').find('.blog-remove-btn').click()
+
+      cy.contains('Type wars').should('not.exist')
     })
   })
 })

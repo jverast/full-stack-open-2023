@@ -137,7 +137,7 @@ const App = () => {
       <Notification info={info} />
       <p>
         {user.name} is logged in{' '}
-        <button type="button" onClick={handleLogout}>
+        <button type="button" onClick={handleLogout} className="logout">
           logout
         </button>
       </p>
