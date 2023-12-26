@@ -65,7 +65,26 @@ describe('Blog app', function () {
       cy.get('.blog-author').should('contain', 'Michael Chan')
     })
 
-    describe('And several blog exists', function () {
+    describe('And a blog exists', function () {
+      beforeEach(function () {
+        cy.createBlog({
+          title: 'React patterns',
+          author: 'Michael Chan',
+          url: 'https://reactpatterns.com/'
+        })
+      })
+
+      it.only('only original creator can see the delete button of a blog', function () {
+        cy.get('.logout').click()
+        cy.login({ username: 'hellas', password: 'salainen' })
+
+        cy.contains('React patterns').parent().parent().as('currentBlog')
+        cy.get('@currentBlog').find('.blog-view-btn').click()
+        cy.get('@currentBlog').find('.blog-remove-btn').should('not.exist')
+      })
+    })
+
+    describe('And several blog exist', function () {
       beforeEach(function () {
         cy.createBlog({
           title: 'Go To Statement Considered Harmful',
@@ -93,7 +112,7 @@ describe('Blog app', function () {
       })
     })
 
-    it.only('user who created a blog can delete it', function () {
+    it('user who created a blog can delete it', function () {
       cy.createBlog({
         title: 'Type wars',
         author: 'Robert C. Martin',
