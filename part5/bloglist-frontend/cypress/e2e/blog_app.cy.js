@@ -74,7 +74,7 @@ describe('Blog app', function () {
         })
       })
 
-      it.only('only original creator can see the delete button of a blog', function () {
+      it('only original creator can see the delete button of a blog', function () {
         cy.get('.logout').click()
         cy.login({ username: 'hellas', password: 'salainen' })
 
@@ -124,6 +124,42 @@ describe('Blog app', function () {
       cy.get('@currentBlog').find('.blog-remove-btn').click()
 
       cy.contains('Type wars').should('not.exist')
+    })
+
+    it.only('blogs should be sorted by number of likes', function () {
+      cy.createBlog({
+        title: 'React patterns',
+        author: 'Michael Chan',
+        url: 'https://reactpatterns.com/'
+      })
+
+      cy.createBlog({
+        title: 'Type wars',
+        author: 'Robert C. Martin',
+        url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
+      })
+
+      // "likes" in the first blog
+      cy.get('.blog').eq(0).as('firstBlog')
+      cy.get('@firstBlog').find('.blog-view-btn').click()
+      const likeBtn1 = cy.get('@firstBlog').find('.blog-like-btn')
+
+      Cypress._.times(3, () => {
+        likeBtn1.click().wait(500)
+      })
+
+      // "likes" in the second blog
+      cy.get('.blog').eq(1).as('lastBlog')
+      cy.get('@lastBlog').find('.blog-view-btn').click()
+      const likeBtn2 = cy.get('@lastBlog').find('.blog-like-btn')
+
+      Cypress._.times(5, () => {
+        likeBtn2.click().wait(500)
+      })
+
+      //tests
+      cy.get('.blog').eq(0).should('contain', 'Type wars')
+      cy.get('.blog').eq(1).should('contain', 'React patterns')
     })
   })
 })

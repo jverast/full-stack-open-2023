@@ -132,7 +132,7 @@ const App = () => {
   const sortBlogs = () => blogs.sort((a, b) => b.likes - a.likes)
 
   return (
-    <div>
+    <div className="blogs">
       <h2>blogs</h2>
       <Notification info={info} />
       <p>
