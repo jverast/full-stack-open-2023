@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import anecdotesReducer from './src/reducers/anecdotesReducer'
+import anecdotesReducer from './src/reducers/anecdoteReducer'
 import filterReducer from './src/reducers/filterReducer'
 
 const store = configureStore({
