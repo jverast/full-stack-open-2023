@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 
-const Blog = ({ updateBlog, removeBlog, user, blog }) => {
+const Blog = ({ updateBlog, removeBlog, userSession, blog }) => {
   const [showDetails, setShowDetails] = useState(false)
 
   const styles = {
@@ -24,7 +24,7 @@ const Blog = ({ updateBlog, removeBlog, user, blog }) => {
   }
 
   const handleShowDetails = () => setShowDetails(!showDetails)
-  const handleRemoveClick = () => removeBlog(blog.id)
+  const handleRemoveClick = () => removeBlog(blog)
   const userId = blog.user.id ?? blog.user
 
   return (
@@ -49,7 +49,7 @@ const Blog = ({ updateBlog, removeBlog, user, blog }) => {
             like
           </button>
         </div>
-        {userId === user.id && (
+        {userId === userSession.id && (
           <button onClick={handleRemoveClick} className="blog-remove-btn">
             remove
           </button>

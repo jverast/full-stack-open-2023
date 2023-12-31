@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import blogService from '../services/blogs'
+import { createNotification } from './notificationReducer'
 
 const initialState = []
 const slice = createSlice({
@@ -34,22 +35,54 @@ export const fetchBlogs = () => {
 
 export const createBlog = (blog) => {
   return async (dispatch) => {
-    const newBlog = await blogService.create(blog)
-    dispatch(appendBlog(newBlog))
+    try {
+      const newBlog = await blogService.create(blog)
+      dispatch(appendBlog(newBlog))
+      dispatch(
+        createNotification({
+          message: `a new blog ${blog.title} added`
+        })
+      )
+    } catch (error) {
+      dispatch(
+        createNotification({
+          message: error.response.data.error,
+          type: 'error'
+        })
+      )
+    }
   }
 }
 
 export const updateBlogLikes = (blog, id) => {
   return async (dispatch) => {
-    const updatedBlog = await blogService.update(blog, id)
-    dispatch(addLikeToBlog(updatedBlog))
+    try {
+      const updatedBlog = await blogService.update(blog, id)
+      dispatch(addLikeToBlog(updatedBlog))
+    } catch (error) {
+      dispatch(
+        createNotification({
+          message: error.response.data.error,
+          type: 'error'
+        })
+      )
+    }
   }
 }
 
 export const deleteBlog = (id) => {
   return async (dispatch) => {
-    await blogService.remove(id)
-    dispatch(dropBlog(id))
+    try {
+      await blogService.remove(id)
+      dispatch(dropBlog(id))
+    } catch (error) {
+      dispatch(
+        createNotification({
+          message: error.response.data.error,
+          type: 'error'
+        })
+      )
+    }
   }
 }
 

@@ -1,108 +1,72 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
-import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 
 import { useDispatch, useSelector } from 'react-redux'
-import { createNotification } from './reducers/notificationReducer'
 import {
   fetchBlogs,
   createBlog,
   updateBlogLikes,
   deleteBlog
 } from './reducers/blogReducer'
-import { loginUser, removeUser, setUser } from './reducers/userReducer'
+import {
+  loginUser,
+  removeUserSession,
+  setUserSession
+} from './reducers/userSessionReducer'
+import { Route, Routes } from 'react-router-dom'
+import Users from './components/Users'
+import { fetchUsers } from './reducers/userReducer'
 
 const App = () => {
   const dispatch = useDispatch()
-  const info = useSelector((state) => state.notification)
+  const users = useSelector((state) => state.users)
   const blogs = useSelector((state) => state.blogs)
-  const user = useSelector((state) => state.user)
+  const userSession = useSelector((state) => state.userSession)
+  const info = useSelector((state) => state.notification)
 
   useEffect(() => {
     dispatch(fetchBlogs())
+    dispatch(fetchUsers())
   }, [])
 
   useEffect(() => {
     const loggedUserJSON = localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      dispatch(setUser(user))
+      dispatch(setUserSession(user))
       blogService.setToken(user.token)
     }
   }, [])
 
   const login = async (username, password) => {
-    try {
-      dispatch(loginUser(username, password))
-    } catch (error) {
-      dispatch(
-        createNotification({
-          message: error.response.data.error,
-          type: 'error'
-        })
-      )
-    }
+    dispatch(loginUser(username, password))
   }
 
   const handleLogout = () => {
-    dispatch(removeUser())
-    localStorage.removeItem('loggedNoteappUser')
+    dispatch(removeUserSession())
   }
 
   const addBlog = async (blog) => {
-    try {
-      dispatch(createBlog(blog))
-      dispatch(
-        createNotification({
-          message: `a new blog ${blog.title} added`
-        })
-      )
-    } catch (error) {
-      dispatch(
-        createNotification({
-          message: error.response.data.error,
-          type: 'error'
-        })
-      )
-    }
+    dispatch(createBlog(blog))
   }
 
   const updateBlog = async (blog, id) => {
-    try {
-      dispatch(updateBlogLikes(blog, id))
-    } catch (error) {
-      dispatch(
-        createNotification({
-          message: error.response.data.error,
-          type: 'error'
-        })
-      )
-    }
+    dispatch(updateBlogLikes(blog, id))
   }
 
-  const removeBlog = async (id) => {
-    const { title } = blogs.find((blog) => blog.id === id)
-    const isConfirm = confirm(`remove blog ${title}`)
+  const removeBlog = async (blog) => {
+    const isConfirm = confirm(`remove blog ${blog.title}`)
     if (isConfirm) {
-      try {
-        dispatch(deleteBlog(id))
-      } catch (error) {
-        dispatch(
-          createNotification({
-            message: error.response.data.error,
-            type: 'error'
-          })
-        )
-      }
+      dispatch(deleteBlog(blog.id))
     }
   }
 
-  if (!user) {
+  if (!userSession) {
     return (
       <div>
         <h2>log in to application</h2>
@@ -120,25 +84,33 @@ const App = () => {
     <div className="blogs">
       <h2>blogs</h2>
       <Notification info={info} />
-      <p>
-        {user.name} is logged in{' '}
-        <button type="button" onClick={handleLogout} className="logout">
-          logout
-        </button>
-      </p>
-      <Togglable labelButton="create new blog">
-        <h2>create new</h2>
-        <BlogForm createBlog={addBlog} />
-      </Togglable>
-      {sortBlogs().map((blog) => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          updateBlog={updateBlog}
-          removeBlog={removeBlog}
-          user={user}
+      <p>{userSession.name} is logged in </p>
+      <button type="button" onClick={handleLogout} className="logout">
+        logout
+      </button>
+      <Routes>
+        <Route path="/users" element={<Users users={users} />} />
+        <Route
+          path="/"
+          element={
+            <>
+              <Togglable labelButton="create new blog">
+                <h2>create new</h2>
+                <BlogForm createBlog={addBlog} />
+              </Togglable>
+              {sortBlogs().map((blog) => (
+                <Blog
+                  key={blog.id}
+                  blog={blog}
+                  updateBlog={updateBlog}
+                  removeBlog={removeBlog}
+                  userSession={userSession}
+                />
+              ))}
+            </>
+          }
         />
-      ))}
+      </Routes>
     </div>
   )
 }
