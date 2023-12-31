@@ -33,10 +33,11 @@ export const fetchBlogs = () => {
   }
 }
 
-export const createBlog = (blog) => {
+export const createBlog = (blog, { name, username, id }) => {
   return async (dispatch) => {
     try {
       const newBlog = await blogService.create(blog)
+      newBlog.user = { name, username, id }
       dispatch(appendBlog(newBlog))
       dispatch(
         createNotification({
@@ -54,10 +55,18 @@ export const createBlog = (blog) => {
   }
 }
 
-export const updateBlogLikes = (blog, id) => {
+export const updateBlogLikes = (blog) => {
   return async (dispatch) => {
     try {
-      const updatedBlog = await blogService.update(blog, id)
+      const blogToUpdate = {
+        user: blog.user.id,
+        likes: blog.likes + 1,
+        author: blog.author,
+        title: blog.title,
+        url: blog.url
+      }
+      const updatedBlog = await blogService.update(blogToUpdate, blog.id)
+      updatedBlog.user = blog.user
       dispatch(addLikeToBlog(updatedBlog))
     } catch (error) {
       dispatch(
@@ -70,11 +79,12 @@ export const updateBlogLikes = (blog, id) => {
   }
 }
 
-export const deleteBlog = (id) => {
+export const deleteBlog = (id, navigate) => {
   return async (dispatch) => {
     try {
       await blogService.remove(id)
       dispatch(dropBlog(id))
+      navigate('/')
     } catch (error) {
       dispatch(
         createNotification({

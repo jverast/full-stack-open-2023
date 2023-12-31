@@ -18,12 +18,14 @@ import {
   removeUserSession,
   setUserSession
 } from './reducers/userSessionReducer'
-import { Route, Routes, useMatch } from 'react-router-dom'
+import { Route, Routes, useMatch, useNavigate } from 'react-router-dom'
 import Users from './components/Users'
 import { fetchUsers } from './reducers/userReducer'
 import User from './components/User'
+import BlogDetails from './components/BlogDetails'
 
 const App = () => {
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const match = useMatch('/users/:id')
   const users = useSelector((state) => state.users)
@@ -54,17 +56,17 @@ const App = () => {
   }
 
   const addBlog = async (blog) => {
-    dispatch(createBlog(blog))
+    dispatch(createBlog(blog, userSession))
   }
 
-  const updateBlog = async (blog, id) => {
-    dispatch(updateBlogLikes(blog, id))
+  const updateBlog = async (blog) => {
+    dispatch(updateBlogLikes(blog))
   }
 
   const removeBlog = async (blog) => {
     const isConfirm = confirm(`remove blog ${blog.title}`)
     if (isConfirm) {
-      dispatch(deleteBlog(blog.id))
+      dispatch(deleteBlog(blog.id, navigate))
     }
   }
 
@@ -97,6 +99,12 @@ const App = () => {
         <Route path="/users/:id" element={<User user={user} />} />
         <Route path="/users" element={<Users users={users} />} />
         <Route
+          path="/blogs/:id"
+          element={
+            <BlogDetails updateBlog={updateBlog} removeBlog={removeBlog} />
+          }
+        />
+        <Route
           path="/"
           element={
             <>
@@ -105,13 +113,7 @@ const App = () => {
                 <BlogForm createBlog={addBlog} />
               </Togglable>
               {sortBlogs().map((blog) => (
-                <Blog
-                  key={blog.id}
-                  blog={blog}
-                  updateBlog={updateBlog}
-                  removeBlog={removeBlog}
-                  userSession={userSession}
-                />
+                <Blog key={blog.id} blog={blog} />
               ))}
             </>
           }
