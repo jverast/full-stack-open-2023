@@ -9,7 +9,12 @@ import LoginForm from './components/LoginForm'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { createNotification } from './reducers/notificationReducer'
-import { fetchBlogs, createBlog } from './reducers/blogReducer'
+import {
+  fetchBlogs,
+  createBlog,
+  updateBlogLikes,
+  deleteBlog
+} from './reducers/blogReducer'
 
 const App = () => {
   const [user, setUser] = useState(null)
@@ -70,10 +75,9 @@ const App = () => {
     }
   }
 
-  const incrementLikes = async (updatedBlog, id) => {
+  const updateBlog = async (blog, id) => {
     try {
-      const returnedBlog = await blogService.update(updatedBlog, id)
-      // setBlogs(blogs.map((blog) => (blog.id === id ? returnedBlog : blog)))
+      dispatch(updateBlogLikes(blog, id))
     } catch (error) {
       dispatch(
         createNotification({
@@ -84,13 +88,12 @@ const App = () => {
     }
   }
 
-  const deleteBlog = async (id) => {
-    const blogToDelete = blogs.find((blog) => blog.id === id)
-    const isConfirm = confirm(`remove blog ${blogToDelete.title}`)
+  const removeBlog = async (id) => {
+    const { title } = blogs.find((blog) => blog.id === id)
+    const isConfirm = confirm(`remove blog ${title}`)
     if (isConfirm) {
       try {
-        await blogService.remove(id)
-        // setBlogs(blogs.filter((blog) => blog.id !== id))
+        dispatch(deleteBlog(id))
       } catch (error) {
         dispatch(
           createNotification({
@@ -134,8 +137,8 @@ const App = () => {
         <Blog
           key={blog.id}
           blog={blog}
-          updateBlog={incrementLikes}
-          removeBlog={deleteBlog}
+          updateBlog={updateBlog}
+          removeBlog={removeBlog}
           user={user}
         />
       ))}
