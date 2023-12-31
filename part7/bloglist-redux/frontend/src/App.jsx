@@ -9,16 +9,17 @@ import LoginForm from './components/LoginForm'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { createNotification } from './reducers/notificationReducer'
+import { fetchBlogs, createBlog } from './reducers/blogReducer'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
 
   const dispatch = useDispatch()
   const info = useSelector((state) => state.notification)
+  const blogs = useSelector((state) => state.blogs)
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
+    dispatch(fetchBlogs())
   }, [])
 
   useEffect(() => {
@@ -51,13 +52,12 @@ const App = () => {
     localStorage.removeItem('loggedNoteappUser')
   }
 
-  const addBlog = async (newBlog) => {
+  const addBlog = async (blog) => {
     try {
-      const blogReturned = await blogService.create(newBlog)
-      setBlogs([...blogs, blogReturned])
+      dispatch(createBlog(blog))
       dispatch(
         createNotification({
-          message: `a new blog ${blogReturned.title} added`
+          message: `a new blog ${blog.title} added`
         })
       )
     } catch (error) {
@@ -73,7 +73,7 @@ const App = () => {
   const incrementLikes = async (updatedBlog, id) => {
     try {
       const returnedBlog = await blogService.update(updatedBlog, id)
-      setBlogs(blogs.map((blog) => (blog.id === id ? returnedBlog : blog)))
+      // setBlogs(blogs.map((blog) => (blog.id === id ? returnedBlog : blog)))
     } catch (error) {
       dispatch(
         createNotification({
@@ -90,7 +90,7 @@ const App = () => {
     if (isConfirm) {
       try {
         await blogService.remove(id)
-        setBlogs(blogs.filter((blog) => blog.id !== id))
+        // setBlogs(blogs.filter((blog) => blog.id !== id))
       } catch (error) {
         dispatch(
           createNotification({
@@ -112,7 +112,9 @@ const App = () => {
     )
   }
 
-  const sortBlogs = () => blogs.sort((a, b) => b.likes - a.likes)
+  const sortBlogs = () => {
+    return Object.assign([], blogs).sort((a, b) => b.likes - a.likes)
+  }
 
   return (
     <div className="blogs">
