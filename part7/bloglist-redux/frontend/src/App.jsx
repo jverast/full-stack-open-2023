@@ -18,7 +18,7 @@ import {
   removeUserSession,
   setUserSession
 } from './reducers/userSessionReducer'
-import { Route, Routes, useMatch, useNavigate } from 'react-router-dom'
+import { Link, Route, Routes, useMatch, useNavigate } from 'react-router-dom'
 import Users from './components/Users'
 import { fetchUsers } from './reducers/userReducer'
 import User from './components/User'
@@ -87,14 +87,25 @@ const App = () => {
   const user =
     users && match ? users.find((user) => user.id === match.params.id) : null
 
+  const style = {
+    backgroundColor: 'rgb(0, 0, 0, .15)',
+    display: 'flex',
+    columnGap: 7,
+    padding: 5
+  }
+
   return (
     <div className="blogs">
-      <h2>blogs</h2>
+      <div style={style}>
+        <Link to="/">blogs</Link>
+        <Link to="/users">users</Link>
+        <span>{userSession.name} is logged in </span>
+        <button type="button" onClick={handleLogout} className="logout">
+          logout
+        </button>
+      </div>
       <Notification info={info} />
-      <p>{userSession.name} is logged in </p>
-      <button type="button" onClick={handleLogout} className="logout">
-        logout
-      </button>
+      <h2>blog app</h2>
       <Routes>
         <Route path="/users/:id" element={<User user={user} />} />
         <Route path="/users" element={<Users users={users} />} />
