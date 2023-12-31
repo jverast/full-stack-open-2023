@@ -18,12 +18,14 @@ import {
   removeUserSession,
   setUserSession
 } from './reducers/userSessionReducer'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useMatch } from 'react-router-dom'
 import Users from './components/Users'
 import { fetchUsers } from './reducers/userReducer'
+import User from './components/User'
 
 const App = () => {
   const dispatch = useDispatch()
+  const match = useMatch('/users/:id')
   const users = useSelector((state) => state.users)
   const blogs = useSelector((state) => state.blogs)
   const userSession = useSelector((state) => state.userSession)
@@ -80,6 +82,9 @@ const App = () => {
     return Object.assign([], blogs).sort((a, b) => b.likes - a.likes)
   }
 
+  const user =
+    users && match ? users.find((user) => user.id === match.params.id) : null
+
   return (
     <div className="blogs">
       <h2>blogs</h2>
@@ -89,6 +94,7 @@ const App = () => {
         logout
       </button>
       <Routes>
+        <Route path="/users/:id" element={<User user={user} />} />
         <Route path="/users" element={<Users users={users} />} />
         <Route
           path="/"
