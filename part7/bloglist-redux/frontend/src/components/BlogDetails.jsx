@@ -37,6 +37,18 @@ const BlogDetails = ({ updateBlog, removeBlog }) => {
       ) : (
         <div>Added by {blog.user.name}</div>
       )}
+      <h2>comments</h2>
+      {!blog.comments.length ? (
+        <p>
+          <i>no comments yet</i>
+        </p>
+      ) : (
+        <ul>
+          {blog.comments.map((comment, index) => (
+            <li key={index}>{comment}</li>
+          ))}
+        </ul>
+      )}
     </>
   )
 }

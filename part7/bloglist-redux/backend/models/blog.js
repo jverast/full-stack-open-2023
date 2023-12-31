@@ -14,6 +14,13 @@ const blogSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  comments: [
+    {
+      type: String,
+      minLength: 4,
+      maxLength: 256
+    }
+  ],
   likes: Number
 })
 

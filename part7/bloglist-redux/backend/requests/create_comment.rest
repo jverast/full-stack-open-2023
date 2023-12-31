@@ -1,0 +1,6 @@
+POST http://localhost:3003/api/blogs/658616cbe2fbec2b678daaff/comments
+Content-Type: application/json
+
+{
+  "comment": "quis tempora quidem nihil iste"
+}
