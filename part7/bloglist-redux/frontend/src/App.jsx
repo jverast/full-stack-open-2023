@@ -15,13 +15,13 @@ import {
   updateBlogLikes,
   deleteBlog
 } from './reducers/blogReducer'
+import { loginUser, removeUser, setUser } from './reducers/userReducer'
 
 const App = () => {
-  const [user, setUser] = useState(null)
-
   const dispatch = useDispatch()
   const info = useSelector((state) => state.notification)
   const blogs = useSelector((state) => state.blogs)
+  const user = useSelector((state) => state.user)
 
   useEffect(() => {
     dispatch(fetchBlogs())
@@ -31,17 +31,14 @@ const App = () => {
     const loggedUserJSON = localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+      dispatch(setUser(user))
       blogService.setToken(user.token)
     }
   }, [])
 
   const login = async (username, password) => {
     try {
-      const user = await loginService.login({ username, password })
-      localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
-      blogService.setToken(user.token)
-      setUser(user)
+      dispatch(loginUser(username, password))
     } catch (error) {
       dispatch(
         createNotification({
@@ -53,7 +50,7 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    setUser(null)
+    dispatch(removeUser())
     localStorage.removeItem('loggedNoteappUser')
   }
 
