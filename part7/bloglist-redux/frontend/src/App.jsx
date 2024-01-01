@@ -24,6 +24,8 @@ import { fetchUsers } from './reducers/userReducer'
 import User from './components/User'
 import BlogDetails from './components/BlogDetails'
 
+import { Button, Col, Container, Row } from 'react-bootstrap'
+
 const App = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -87,49 +89,72 @@ const App = () => {
   const user =
     users && match ? users.find((user) => user.id === match.params.id) : null
 
-  const style = {
-    backgroundColor: 'rgb(0, 0, 0, .15)',
-    display: 'flex',
-    columnGap: 7,
-    padding: 5
-  }
-
   return (
-    <div className="blogs">
-      <div style={style}>
-        <Link to="/">blogs</Link>
-        <Link to="/users">users</Link>
-        <span>{userSession.name} is logged in </span>
-        <button type="button" onClick={handleLogout} className="logout">
-          logout
-        </button>
-      </div>
-      <Notification info={info} />
-      <h2>blog app</h2>
-      <Routes>
-        <Route path="/users/:id" element={<User user={user} />} />
-        <Route path="/users" element={<Users users={users} />} />
-        <Route
-          path="/blogs/:id"
-          element={
-            <BlogDetails updateBlog={updateBlog} removeBlog={removeBlog} />
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <>
-              <Togglable labelButton="create new blog">
-                <h2>create new</h2>
-                <BlogForm createBlog={addBlog} />
-              </Togglable>
-              {sortBlogs().map((blog) => (
-                <Blog key={blog.id} blog={blog} />
-              ))}
-            </>
-          }
-        />
-      </Routes>
+    <div className="blogs" style={{ minWidth: 430 }}>
+      <nav className="mb-3 p-2 d-flex justify-content-center bg-secondary-subtle">
+        <div
+          className="w-100 d-flex justify-content-between"
+          style={{ maxWidth: 1024 }}
+        >
+          <div>
+            <h2 className="m-0">blog app</h2>
+          </div>
+          <div className="col d-flex gap-2 align-items-center col-sm-9 justify-content-end">
+            <Link to="/" className="link-underline link-underline-opacity-0">
+              blogs
+            </Link>
+            <Link
+              to="/users"
+              className="link-underline link-underline-opacity-0"
+            >
+              users
+            </Link>
+            <span style={{ fontSize: '.8rem', position: 'relative', top: 0 }}>
+              <strong>{userSession.name}</strong> is logged in{' '}
+            </span>
+            <Button
+              type="button"
+              onClick={handleLogout}
+              className="logout"
+              size="sm"
+              variant="danger"
+            >
+              logout
+            </Button>
+          </div>
+        </div>
+      </nav>
+      <Container style={{ maxWidth: 1024 }}>
+        <Notification info={info} />
+        <div>
+          <Routes>
+            <Route path="/users/:id" element={<User user={user} />} />
+            <Route path="/users" element={<Users users={users} />} />
+            <Route
+              path="/blogs/:id"
+              element={
+                <BlogDetails updateBlog={updateBlog} removeBlog={removeBlog} />
+              }
+            />
+            <Route
+              path="/"
+              element={
+                <>
+                  <Togglable labelButton="create new blog">
+                    <h2>create new blog</h2>
+                    <BlogForm createBlog={addBlog} />
+                  </Togglable>
+                  <div className="d-flex flex-column row-gap-1">
+                    {sortBlogs().map((blog) => (
+                      <Blog key={blog.id} blog={blog} />
+                    ))}
+                  </div>
+                </>
+              }
+            />
+          </Routes>
+        </div>
+      </Container>
     </div>
   )
 }

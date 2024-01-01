@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from 'react-bootstrap'
 
 const Togglable = (props) => {
   const [visible, setVisible] = useState(false)
@@ -6,16 +7,33 @@ const Togglable = (props) => {
 
   return (
     <>
-      <div style={{ display: visible ? 'none' : '' }}>
-        <button type="button" onClick={() => toggleVisible()}>
+      <div
+        style={{ display: visible ? 'none' : '' }}
+        className="text-center mb-3"
+      >
+        <Button
+          type="button"
+          onClick={() => toggleVisible()}
+          variant="primary"
+          size={'sm'}
+        >
           {props.labelButton}
-        </button>
+        </Button>
       </div>
-      <div style={{ display: visible ? '' : 'none' }}>
+      <div
+        style={{ display: visible ? '' : 'none' }}
+        className="mb-3 text-center"
+      >
         {props.children}
-        <button type="button" onClick={() => toggleVisible()}>
+        <Button
+          type="button"
+          onClick={() => toggleVisible()}
+          variant="outline-danger"
+          size={'sm'}
+          className="px-5"
+        >
           cancel
-        </button>
+        </Button>
       </div>
     </>
   )
