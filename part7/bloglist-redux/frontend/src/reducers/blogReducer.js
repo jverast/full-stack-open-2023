@@ -20,11 +20,22 @@ const slice = createSlice({
     },
     dropBlog(state, action) {
       return state.filter((blog) => blog.id !== action.payload)
+    },
+    appendComment(state, action) {
+      const blogToUpdate = state.find((blog) => blog.id === action.payload.id)
+      const updatedBlog = {
+        ...blogToUpdate,
+        comments: blogToUpdate.comments.concat(action.payload.comment)
+      }
+      return state.map((blog) =>
+        blog.id === action.payload.id ? updatedBlog : blog
+      )
     }
   }
 })
 
-export const { setBlogs, appendBlog, addLikeToBlog, dropBlog } = slice.actions
+export const { setBlogs, appendBlog, addLikeToBlog, appendComment, dropBlog } =
+  slice.actions
 
 export const fetchBlogs = () => {
   return async (dispatch) => {
@@ -85,6 +96,22 @@ export const deleteBlog = (id, navigate) => {
       await blogService.remove(id)
       dispatch(dropBlog(id))
       navigate('/')
+    } catch (error) {
+      dispatch(
+        createNotification({
+          message: error.response.data.error,
+          type: 'error'
+        })
+      )
+    }
+  }
+}
+
+export const createComment = (id, comment) => {
+  return async (dispatch) => {
+    try {
+      await blogService.addComment(id, comment)
+      dispatch(appendComment({ id, comment }))
     } catch (error) {
       dispatch(
         createNotification({

@@ -1,8 +1,10 @@
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
+import { createComment } from '../reducers/blogReducer'
 
 const BlogDetails = ({ updateBlog, removeBlog }) => {
   const id = useParams().id,
+    dispatch = useDispatch(),
     blogs = useSelector((state) => state.blogs),
     userSession = useSelector((state) => state.userSession),
     blog = blogs.find((blog) => blog.id === id)
@@ -13,6 +15,13 @@ const BlogDetails = ({ updateBlog, removeBlog }) => {
 
   const handleLikeClick = () => updateBlog(blog)
   const handleRemoveClick = () => removeBlog(blog)
+
+  const handleCommentSubmit = (event) => {
+    event.preventDefault()
+    const comment = event.target.comment.value
+    event.target.comment.value = ''
+    dispatch(createComment(blog.id, comment))
+  }
 
   return (
     <>
@@ -38,6 +47,10 @@ const BlogDetails = ({ updateBlog, removeBlog }) => {
         <div>Added by {blog.user.name}</div>
       )}
       <h2>comments</h2>
+      <form onSubmit={handleCommentSubmit}>
+        <input type="text" name="comment" />
+        <button>add comment</button>
+      </form>
       {!blog.comments.length ? (
         <p>
           <i>no comments yet</i>
