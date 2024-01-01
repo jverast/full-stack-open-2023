@@ -1,22 +1,18 @@
+import { Alert } from 'react-bootstrap'
+
 const Notification = ({ info }) => {
   if (!info) {
     return
   }
 
-  const style = {
-    color: info.type === 'error' ? 'red' : 'green',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10
-  }
-
   return (
-    <div className="info" style={style}>
+    <Alert
+      className="info"
+      style={{ width: '100%' }}
+      variant={info.type === 'error' ? 'danger' : 'success'}
+    >
       {info.message}
-    </div>
+    </Alert>
   )
 }
 

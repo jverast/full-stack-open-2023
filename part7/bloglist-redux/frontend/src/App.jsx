@@ -24,7 +24,7 @@ import { fetchUsers } from './reducers/userReducer'
 import User from './components/User'
 import BlogDetails from './components/BlogDetails'
 
-import { Button, Col, Container, Row } from 'react-bootstrap'
+import { Button, Card, Container } from 'react-bootstrap'
 
 const App = () => {
   const navigate = useNavigate()
@@ -74,10 +74,17 @@ const App = () => {
 
   if (!userSession) {
     return (
-      <div>
-        <h2>log in to application</h2>
+      <div
+        className="vh-100 d-flex flex-column justify-content-center mx-auto"
+        style={{ width: 600 }}
+      >
         <Notification info={info} />
-        <LoginForm login={login} />
+        <Card className="w-100">
+          <Card.Header>
+            <Card.Title className="my-1">log in to application</Card.Title>
+          </Card.Header>
+          <LoginForm login={login} />
+        </Card>
       </div>
     )
   }
@@ -97,7 +104,7 @@ const App = () => {
           style={{ maxWidth: 1024 }}
         >
           <div>
-            <h2 className="m-0">blog app</h2>
+            <h2 className="m-1">blog app</h2>
           </div>
           <div className="col d-flex gap-2 align-items-center col-sm-9 justify-content-end">
             <Link to="/" className="link-underline link-underline-opacity-0">

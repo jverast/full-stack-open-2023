@@ -11,12 +11,7 @@ const Togglable = (props) => {
         style={{ display: visible ? 'none' : '' }}
         className="text-center mb-3"
       >
-        <Button
-          type="button"
-          onClick={() => toggleVisible()}
-          variant="primary"
-          size={'sm'}
-        >
+        <Button type="button" onClick={() => toggleVisible()} variant="primary">
           {props.labelButton}
         </Button>
       </div>

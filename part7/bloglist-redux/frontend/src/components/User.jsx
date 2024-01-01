@@ -1,4 +1,5 @@
 import React from 'react'
+import { Card, ListGroup } from 'react-bootstrap'
 
 const User = ({ user }) => {
   if (!user) {
@@ -6,15 +7,20 @@ const User = ({ user }) => {
   }
 
   return (
-    <>
-      <h2>{user.name}</h2>
-      <h3>added blogs</h3>
-      <ul>
+    <Card>
+      <Card.Header>
+        <Card.Title>
+          blogs added by <em>{user.name}</em>
+        </Card.Title>
+      </Card.Header>
+      <ListGroup as="ol" numbered>
         {user.blogs.map((blog) => (
-          <li key={blog.id}>{blog.title}</li>
+          <ListGroup.Item as="li" key={blog.id}>
+            {blog.title}
+          </ListGroup.Item>
         ))}
-      </ul>
-    </>
+      </ListGroup>
+    </Card>
   )
 }
 
