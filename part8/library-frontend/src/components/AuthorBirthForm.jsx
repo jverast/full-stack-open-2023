@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { UPDATE_AUTHOR_BIRTH, ALL_AUTHORS } from '../queries'
-import { useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
+import AuthorPicker from './AuthorPicker'
 
 const AuthorBirthForm = () => {
-  const [name, setName] = useState('')
   const [born, setBorn] = useState('')
   const navigate = useNavigate()
 
+  const result = useQuery(ALL_AUTHORS)
   const [updateAuthorBirth] = useMutation(UPDATE_AUTHOR_BIRTH, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onCompleted: () => {
@@ -18,21 +19,24 @@ const AuthorBirthForm = () => {
   const submit = (event) => {
     event.preventDefault()
     updateAuthorBirth({
-      variables: { name: name || undefined, born: Number(born) || undefined }
+      variables: {
+        name: event.target.author.value,
+        born: Number(born) || undefined
+      }
     })
   }
+
+  if (result.loading) {
+    return null
+  }
+
+  const authors = result.data.allAuthors
 
   return (
     <>
       <h2>Set birthyear</h2>
       <form onSubmit={submit}>
-        <div>
-          name
-          <input
-            value={name}
-            onChange={({ target }) => setName(target.value)}
-          />
-        </div>
+        <AuthorPicker authors={authors} />
         <div>
           born
           <input
