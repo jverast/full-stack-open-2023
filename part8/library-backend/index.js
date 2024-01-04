@@ -1,5 +1,6 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { GraphQLError } = require('graphql')
 
 const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
@@ -61,7 +62,7 @@ const resolvers = {
     bookCount: async () => Book.collection.countDocuments(),
     allBooks: async (root, args) => {
       if (!args.author && !args.genre) {
-        return Book.find({})
+        return Book.find({}).populate('author')
       }
 
       const authors = await Book.find({}).populate('author')
@@ -83,13 +84,31 @@ const resolvers = {
       for (const author of authors) {
         const booksByAuthor = await Book.find({ author: author._id })
         author.bookCount = booksByAuthor.length
-        await author.save()
       }
+
       return authors
     }
   },
   Mutation: {
     addBook: async (root, args) => {
+      for (const key in args) {
+        if (!/title|author/.test(key)) {
+          continue
+        }
+
+        if (args[key].length < 4) {
+          throw new GraphQLError(
+            `'${key}' must be at least 4, got ${args[key].length}`,
+            {
+              extensions: {
+                code: 'BAD_USER_INPUT',
+                invalidArgs: args[key]
+              }
+            }
+          )
+        }
+      }
+
       let author = await Author.findOne({ name: args.author })
 
       if (!author) {
@@ -104,6 +123,18 @@ const resolvers = {
       return book
     },
     editAuthor: async (root, args) => {
+      if (args.name.length < 4) {
+        throw new GraphQLError(
+          `'name' must be at least 4, got ${args.name.length}`,
+          {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.name
+            }
+          }
+        )
+      }
+
       const author = await Author.findOne({ name: args.name })
       author.born = args.setBornTo
 
