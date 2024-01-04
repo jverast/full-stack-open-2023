@@ -23,7 +23,8 @@ mongoose
 const typeDefs = `
   type Author {
     name: String!
-    born: Int!
+    bookCount: Int
+    born: Int
     id: ID!
   }
 
@@ -58,12 +59,68 @@ const resolvers = {
   Query: {
     authorCount: async () => Author.collection.countDocuments(),
     bookCount: async () => Book.collection.countDocuments(),
-    allBooks: async () => Book.find({}),
-    allAuthors: async () => Author.find({})
+    allBooks: async (root, args) => {
+      if (!args.author && !args.genre) {
+        return Book.find({})
+      }
+
+      const authors = await Book.find({}).populate('author')
+
+      if (args.author && args.genre) {
+        return authors.filter(
+          ({ author, genres }) =>
+            author.name === args.author && genres.includes(args.genre)
+        )
+      } else if (args.author) {
+        return authors.filter(({ author }) => author.name === args.author)
+      } else {
+        return authors.filter(({ genres }) => genres.includes(args.genre))
+      }
+    },
+    allAuthors: async () => {
+      const authors = await Author.find({})
+
+      for (const author of authors) {
+        const booksByAuthor = await Book.find({ author: author._id })
+        author.bookCount = booksByAuthor.length
+        await author.save()
+      }
+      return authors
+    }
   },
   Mutation: {
-    addBook: async (root, args) => null,
-    editAuthor: (root, args) => null
+    addBook: async (root, args) => {
+      let author = await Author.findOne({ name: args.author })
+
+      if (!author) {
+        author = new Author({ name: args.author })
+        await author.save()
+      }
+
+      const book = new Book({ ...args, author: author._id })
+      await book.populate('author')
+
+      await book.save()
+      return book
+    },
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name })
+      author.born = args.setBornTo
+
+      try {
+        await author.save()
+      } catch (error) {
+        throw new GraphQLError('Saving author failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+            error
+          }
+        })
+      }
+
+      return author
+    }
   }
 }
 
