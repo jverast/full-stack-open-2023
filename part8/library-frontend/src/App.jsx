@@ -1,22 +1,57 @@
-import { Link, Route, Routes } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import Books from './components/Books'
 import Authors from './components/Authors'
 import NewBook from './components/NewBook'
 import AuthorBirthForm from './components/AuthorBirthForm'
+import LoginForm from './components/LoginForm'
+import { useApolloClient } from '@apollo/client'
 
 const App = () => {
+  const [token, setToken] = useState(null)
+  const client = useApolloClient()
+  const navigate = useNavigate()
+
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+    navigate('/login')
+  }
+
   return (
     <>
       <div style={{ display: 'flex', gap: 6 }}>
         <Link to="/">authors</Link>
         <Link to="/books">books</Link>
-        <Link to="/add-book">add book</Link>
-        <Link to="/update-author-birth">udpate author birth</Link>
+        {!token ? (
+          <Link to="/login">
+            <button type="button">login</button>
+          </Link>
+        ) : (
+          <>
+            <Link to="/add-book">add book</Link>
+            <Link to="/update-author-birth">udpate author birth</Link>
+            <button onClick={logout}>logout</button>
+          </>
+        )}
       </div>
       <Routes>
         <Route path="/books" element={<Books />} />
-        <Route path="/add-book" element={<NewBook />} />
-        <Route path="/update-author-birth" element={<AuthorBirthForm />} />
+        <Route
+          path="/login"
+          element={
+            !token ? <LoginForm setToken={setToken} /> : <Navigate to="/" />
+          }
+        />
+        <Route
+          path="/add-book"
+          element={token ? <NewBook /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/update-author-birth"
+          element={token ? <AuthorBirthForm /> : <Navigate to="/" />}
+        />
         <Route path="/" element={<Authors />} />
       </Routes>
     </>

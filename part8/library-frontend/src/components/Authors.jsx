@@ -7,7 +7,7 @@ const Authors = () => {
   if (result.loading) {
     return (
       <div>
-        <h2>books</h2>
+        <h2>authors</h2>
         <p>loading...</p>
       </div>
     )

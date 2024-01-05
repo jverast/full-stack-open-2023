@@ -12,9 +12,17 @@ const NewBook = () => {
 
   const navigate = useNavigate()
   const [createBook] = useMutation(CREATE_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    refetchQueries: [{ query: ALL_AUTHORS }],
     onCompleted: () => {
       navigate('/books')
+    },
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        console.log(allBooks, response.data.addBook)
+        return {
+          allBooks: allBooks.concat(response.data.addBook)
+        }
+      })
     }
   })
 

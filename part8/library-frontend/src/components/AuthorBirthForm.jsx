@@ -10,9 +10,20 @@ const AuthorBirthForm = () => {
 
   const result = useQuery(ALL_AUTHORS)
   const [updateAuthorBirth] = useMutation(UPDATE_AUTHOR_BIRTH, {
-    refetchQueries: [{ query: ALL_AUTHORS }],
     onCompleted: () => {
       navigate('/')
+    },
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
+        console.log(allAuthors, response.data.editAuthor)
+        return {
+          allAuthors: allAuthors.map((a) =>
+            a.name === response.data.editAuthor.name
+              ? { ...a, born: response.data.editAuthor.born }
+              : a
+          )
+        }
+      })
     }
   })
 
