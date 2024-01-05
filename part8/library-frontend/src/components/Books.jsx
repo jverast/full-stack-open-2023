@@ -4,12 +4,12 @@ import { useState } from 'react'
 
 const Books = () => {
   const [genre, setGenre] = useState('')
-  const result1 = useQuery(ALL_BOOKS)
-  const result2 = useQuery(FILTER_ALL_BOOKS, {
+  const resultAllBooks = useQuery(ALL_BOOKS)
+  const resultFilterAllBooks = useQuery(FILTER_ALL_BOOKS, {
     variables: { genre }
   })
 
-  if (result2.loading) {
+  if (resultFilterAllBooks.loading) {
     return (
       <div>
         <h2>books</h2>
@@ -18,9 +18,9 @@ const Books = () => {
     )
   }
 
-  const books = result2.data.allBooks ?? []
-  const genres = [
-    ...new Set(result1.data.allBooks.map((book) => book.genres).flat())
+  const books = resultFilterAllBooks.data.allBooks ?? []
+  const Allgenres = [
+    ...new Set(resultAllBooks.data.allBooks.map((book) => book.genres).flat())
   ]
 
   return (
@@ -46,7 +46,7 @@ const Books = () => {
         </tbody>
       </table>
       <div>
-        {genres.map((genre) => (
+        {Allgenres.map((genre) => (
           <button key={genre} onClick={() => setGenre(genre)}>
             {genre}
           </button>
