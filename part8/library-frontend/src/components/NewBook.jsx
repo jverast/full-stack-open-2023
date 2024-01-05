@@ -18,7 +18,6 @@ const NewBook = () => {
     },
     update: (cache, response) => {
       cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-        console.log(allBooks, response.data.addBook)
         return {
           allBooks: allBooks.concat(response.data.addBook)
         }
