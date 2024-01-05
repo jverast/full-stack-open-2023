@@ -6,6 +6,7 @@ import NewBook from './components/NewBook'
 import AuthorBirthForm from './components/AuthorBirthForm'
 import LoginForm from './components/LoginForm'
 import { useApolloClient } from '@apollo/client'
+import FavoriteGenres from './components/FavoriteGenres'
 
 const App = () => {
   const [token, setToken] = useState(null)
@@ -32,25 +33,24 @@ const App = () => {
           <>
             <Link to="/add-book">add book</Link>
             <Link to="/update-author-birth">udpate author birth</Link>
+            <Link to="/recommend">recommend</Link>
             <button onClick={logout}>logout</button>
           </>
         )}
       </div>
       <Routes>
         <Route path="/books" element={<Books />} />
+        <Route path="/recommend" element={token && <FavoriteGenres />} />
         <Route
           path="/login"
           element={
             !token ? <LoginForm setToken={setToken} /> : <Navigate to="/" />
           }
         />
-        <Route
-          path="/add-book"
-          element={token ? <NewBook /> : <Navigate to="/" />}
-        />
+        <Route path="/add-book" element={token && <NewBook />} />
         <Route
           path="/update-author-birth"
-          element={token ? <AuthorBirthForm /> : <Navigate to="/" />}
+          element={token && <AuthorBirthForm />}
         />
         <Route path="/" element={<Authors />} />
       </Routes>
