@@ -32,7 +32,7 @@ const App = () => {
         ) : (
           <>
             <Link to="/add-book">add book</Link>
-            <Link to="/update-author-birth">udpate author birth</Link>
+            <Link to="/update-author">udpate author</Link>
             <Link to="/recommend">recommend</Link>
             <button onClick={logout}>logout</button>
           </>
@@ -48,10 +48,7 @@ const App = () => {
           }
         />
         <Route path="/add-book" element={token && <NewBook />} />
-        <Route
-          path="/update-author-birth"
-          element={token && <AuthorBirthForm />}
-        />
+        <Route path="/update-author" element={token && <AuthorBirthForm />} />
         <Route path="/" element={<Authors />} />
       </Routes>
     </>
