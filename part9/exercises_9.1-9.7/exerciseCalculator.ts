@@ -1,3 +1,5 @@
+import { isNumber, toNumber } from './utils';
+
 interface Result {
   periodLength: number;
   trainingDays: number;
@@ -7,6 +9,17 @@ interface Result {
   target: number;
   average: number;
 }
+
+export const parseArgs = (args: string[]): number[] => {
+  if (args.length < 4) throw new Error('Not enough arguments');
+
+  const [, , ...argsn]: string[] = args;
+  if (isNumber(argsn)) {
+    return [...toNumber(argsn)];
+  } else {
+    throw new Error('Provided values were not numbers!');
+  }
+};
 
 const calculateExercises = (daylyExcr: number[], target: number): Result => {
   const periodLength: number = daylyExcr.length;
@@ -40,4 +53,13 @@ const calculateExercises = (daylyExcr: number[], target: number): Result => {
   };
 };
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+try {
+  const [target, ...daylyExcr] = parseArgs(process.argv);
+  console.log(calculateExercises(daylyExcr, target));
+} catch (error: unknown) {
+  let errorMessage = 'Something bad happened.';
+  if (error instanceof Error) {
+    errorMessage += ' Error: ' + error.message;
+  }
+  console.log(errorMessage);
+}
