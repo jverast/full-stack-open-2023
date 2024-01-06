@@ -29,16 +29,7 @@ const resolvers = {
         return authors.filter(({ genres }) => genres.includes(args.genre))
       }
     },
-    allAuthors: async () => {
-      const authors = await Author.find({})
-
-      for (const author of authors) {
-        const booksByAuthor = await Book.find({ author: author._id })
-        author.bookCount = booksByAuthor.length
-      }
-
-      return authors
-    },
+    allAuthors: async () => Author.find({}),
     me: async (root, args, { currentUser }) => {
       return currentUser
         ? User.findOne({ username: currentUser.username })
@@ -75,10 +66,10 @@ const resolvers = {
 
       let author = await Author.findOne({ name: args.author })
 
-      if (!author) {
-        author = new Author({ name: args.author })
-        await author.save()
-      }
+      if (!author) author = new Author({ name: args.author })
+      else author.bookCount = author.bookCount + 1
+
+      await author.save()
 
       const book = new Book({ ...args, author: author._id })
       await book.populate('author')
