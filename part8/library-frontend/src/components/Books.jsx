@@ -9,7 +9,7 @@ const Books = () => {
     variables: { genre }
   })
 
-  if (resultFilterAllBooks.loading) {
+  if (resultFilterAllBooks.loading || resultAllBooks.loading) {
     return (
       <div>
         <h2>books</h2>
