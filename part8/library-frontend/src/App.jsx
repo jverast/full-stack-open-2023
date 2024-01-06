@@ -7,12 +7,39 @@ import AuthorBirthForm from './components/AuthorBirthForm'
 import LoginForm from './components/LoginForm'
 import { useApolloClient, useSubscription } from '@apollo/client'
 import FavoriteGenres from './components/FavoriteGenres'
-import { BOOK_ADDED } from './queries'
+import { ALL_BOOKS, BOOK_ADDED } from './queries'
+import Notify from './components/Notify'
+
+const updateCache = (cache, query, addedBook) => {
+  // helper that is used to eliminate saving same book twice
+  const uniqByName = (a) => {
+    let seen = new Set()
+    return a.filter((item) => {
+      let k = item.title
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqByName(allBooks.concat(addedBook))
+    }
+  })
+}
 
 const App = () => {
   const [token, setToken] = useState(null)
+  const [message, setMessage] = useState(null)
+
   const client = useApolloClient()
   const navigate = useNavigate()
+
+  const showMessage = (message) => {
+    setMessage(message)
+    setTimeout(() => {
+      setMessage(null)
+    }, 10000)
+  }
 
   const logout = () => {
     setToken(null)
@@ -22,11 +49,10 @@ const App = () => {
   }
 
   useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
+    onData: ({ data, client }) => {
       const addedBook = data.data.bookAdded
-      setTimeout(() => {
-        alert(`'${addedBook.title}' added`)
-      }, 5000)
+      showMessage(`'${addedBook.title}' added`)
+      updateCache(client.cache, { query: ALL_BOOKS }, addedBook)
     }
   })
 
@@ -48,6 +74,7 @@ const App = () => {
           </>
         )}
       </div>
+      <Notify message={message} />
       <Routes>
         <Route path="/books" element={<Books />} />
         <Route path="/recommend" element={token && <FavoriteGenres />} />

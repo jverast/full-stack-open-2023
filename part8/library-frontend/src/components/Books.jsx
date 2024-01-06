@@ -6,7 +6,8 @@ const Books = () => {
   const [genre, setGenre] = useState('')
   const resultAllBooks = useQuery(ALL_BOOKS)
   const resultFilterAllBooks = useQuery(FILTER_ALL_BOOKS, {
-    variables: { genre }
+    variables: { genre },
+    skip: !genre
   })
 
   if (resultFilterAllBooks.loading || resultAllBooks.loading) {
@@ -18,7 +19,9 @@ const Books = () => {
     )
   }
 
-  const books = resultFilterAllBooks.data.allBooks ?? []
+  const books = genre
+    ? resultFilterAllBooks.data.allBooks
+    : resultAllBooks.data.allBooks
   const Allgenres = [
     ...new Set(resultAllBooks.data.allBooks.map((book) => book.genres).flat())
   ]

@@ -15,13 +15,6 @@ const NewBook = () => {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onCompleted: () => {
       navigate('/books')
-    },
-    update: (cache, response) => {
-      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-        return {
-          allBooks: allBooks.concat(response.data.addBook)
-        }
-      })
     }
   })
 
