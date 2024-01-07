@@ -1,4 +1,4 @@
-export const isNumber = (args: string[]): boolean => {
+export const isNumber = (args: string[] | number[]): boolean => {
   return args.every((arg) => !isNaN(Number(arg))) ? true : false;
 };
 
