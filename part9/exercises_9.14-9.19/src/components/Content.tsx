@@ -1,21 +1,23 @@
-interface Parts {
-  name: string;
-  exerciseCount: number;
-}
+import Part from './Part';
+import { CoursePart } from '../types';
 
 interface ContentProps {
-  parts: Parts[];
+  parts: CoursePart[];
 }
 
 const Content = (props: ContentProps) => {
+  const styles: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: 10
+  };
+
   return (
-    <>
+    <div style={styles}>
       {props.parts.map((part) => (
-        <p key={part.name}>
-          {part.name} {part.exerciseCount}
-        </p>
+        <Part key={part.name} part={part} />
       ))}
-    </>
+    </div>
   );
 };
 
