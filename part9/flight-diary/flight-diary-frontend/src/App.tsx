@@ -8,6 +8,7 @@ import AddDiaryForm from './components/AddDiaryForm';
 
 const App = () => {
   const [diaries, setDiaries] = useState<NonSensitiveDiaryValues[]>([]);
+  const [message, setMessage] = useState<string>('');
 
   useEffect(() => {
     const fetchDiaryList = async () => {
@@ -20,7 +21,12 @@ const App = () => {
 
   return (
     <div className="diary">
-      <AddDiaryForm diaries={diaries} setDiaries={setDiaries} />
+      <AddDiaryForm
+        diaries={diaries}
+        setDiaries={setDiaries}
+        setErrorMessage={setMessage}
+        message={message}
+      />
       <DiaryList diaries={diaries} />
     </div>
   );

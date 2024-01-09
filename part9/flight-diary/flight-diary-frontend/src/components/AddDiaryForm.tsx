@@ -1,13 +1,22 @@
 import { useState, SyntheticEvent } from 'react';
 import diaryService from '../services/diaryService';
-import { DiaryFormValues, NonSensitiveDiaryValues } from '../types';
+import { NonSensitiveDiaryValues } from '../types';
+import axios from 'axios';
+import Notify from './Notify';
 
 interface Props {
   diaries: NonSensitiveDiaryValues[];
   setDiaries: React.Dispatch<React.SetStateAction<NonSensitiveDiaryValues[]>>;
+  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  message: string;
 }
 
-const AddDiaryForm = ({ diaries, setDiaries }: Props) => {
+const AddDiaryForm = ({
+  diaries,
+  setDiaries,
+  setErrorMessage,
+  message
+}: Props) => {
   const [date, setDate] = useState<string>('');
   const [visibility, setVisibility] = useState<string>('');
   const [weather, setWeather] = useState<string>('');
@@ -16,23 +25,45 @@ const AddDiaryForm = ({ diaries, setDiaries }: Props) => {
   const submitNewDiary = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault();
 
-    const newDiary = await diaryService.createDiary({
-      date,
-      visibility,
-      weather,
-      comment
-    } as DiaryFormValues);
-    setDiaries([...diaries, newDiary]);
+    try {
+      const newDiary = await diaryService.createDiary({
+        date,
+        visibility,
+        weather,
+        comment
+      });
+      setDiaries([...diaries, newDiary]);
 
-    setDate('');
-    setVisibility('');
-    setWeather('');
-    setComment('');
+      setDate('');
+      setVisibility('');
+      setWeather('');
+      setComment('');
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error?.response?.data && typeof error.response.data === 'string') {
+          showMessage(error.response.data.substring(21));
+        } else {
+          showMessage('Unrecognized axios error');
+          console.error(error);
+        }
+      } else {
+        showMessage('Unknown error');
+        console.error(error);
+      }
+    }
+  };
+
+  const showMessage = (message: string): void => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage('');
+    }, 5000);
   };
 
   return (
     <>
       <h2>Add new entry</h2>
+      <Notify message={message} />
       <form onSubmit={submitNewDiary}>
         <div>
           date
