@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-
 import { NonSensitiveDiaryValues } from './types';
 
 import diaryService from './services/diaryService';
+
 import DiaryList from './components/DiaryList';
 import AddDiaryForm from './components/AddDiaryForm';
 

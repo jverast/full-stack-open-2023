@@ -1,8 +1,13 @@
-import { useState, SyntheticEvent } from 'react';
+import { SyntheticEvent } from 'react';
+import axios from 'axios';
 import diaryService from '../services/diaryService';
 import { NonSensitiveDiaryValues } from '../types';
-import axios from 'axios';
 import Notify from './Notify';
+import Field from './Field';
+
+import { useField } from '../hooks';
+
+import styled from 'styled-components';
 
 interface Props {
   diaries: NonSensitiveDiaryValues[];
@@ -11,33 +16,39 @@ interface Props {
   message: string;
 }
 
+const FieldContainer = styled.div`
+  & > span {
+    margin-right: 0.75rem;
+  }
+`;
+
 const AddDiaryForm = ({
   diaries,
   setDiaries,
   setErrorMessage,
   message
 }: Props) => {
-  const [date, setDate] = useState<string>('');
-  const [visibility, setVisibility] = useState<string>('');
-  const [weather, setWeather] = useState<string>('');
-  const [comment, setComment] = useState<string>('');
+  const { reset: resetDate, ...date } = useField('date');
+  const { reset: resetVisibility, ...visibility } = useField('radio');
+  const { reset: resetWeather, ...weather } = useField('radio');
+  const { reset: resetComment, ...comment } = useField('text');
 
   const submitNewDiary = async (event: SyntheticEvent): Promise<void> => {
     event.preventDefault();
 
     try {
       const newDiary = await diaryService.createDiary({
-        date,
-        visibility,
-        weather,
-        comment
+        date: date.value,
+        visibility: visibility.value,
+        weather: weather.value,
+        comment: comment.value
       });
       setDiaries([...diaries, newDiary]);
 
-      setDate('');
-      setVisibility('');
-      setWeather('');
-      setComment('');
+      resetDate();
+      resetVisibility();
+      resetWeather();
+      resetComment();
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         if (error?.response?.data && typeof error.response.data === 'string') {
@@ -65,38 +76,29 @@ const AddDiaryForm = ({
       <h2>Add new entry</h2>
       <Notify message={message} />
       <form onSubmit={submitNewDiary}>
-        <div>
-          date
-          <input
-            type="text"
-            value={date}
-            onChange={({ target }) => setDate(target.value)}
-          />
-        </div>
-        <div>
-          visibility
-          <input
-            type="text"
-            value={visibility}
-            onChange={({ target }) => setVisibility(target.value)}
-          />
-        </div>
-        <div>
-          weather
-          <input
-            type="text"
-            value={weather}
-            onChange={({ target }) => setWeather(target.value)}
-          />
-        </div>
-        <div>
-          comment
-          <input
-            type="text"
-            value={comment}
-            onChange={({ target }) => setComment(target.value)}
-          />
-        </div>
+        <FieldContainer>
+          <span>date</span>
+          <Field {...date} />
+        </FieldContainer>
+        <FieldContainer>
+          <span>visibility</span>
+          <Field id="great" name="visibility" {...visibility} />
+          <Field id="good" name="visibility" {...visibility} />
+          <Field id="ok" name="visibility" {...visibility} />
+          <Field id="poor" name="visibility" {...visibility} />
+        </FieldContainer>
+        <FieldContainer>
+          <span>weather</span>
+          <Field id="sunny" name="weather" {...weather} />
+          <Field id="rainy" name="weather" {...weather} />
+          <Field id="cloudy" name="weather" {...weather} />
+          <Field id="stormy" name="weather" {...weather} />
+          <Field id="windy" name="weather" {...weather} />
+        </FieldContainer>
+        <FieldContainer>
+          <span>comment</span>
+          <Field {...comment} />
+        </FieldContainer>
         <button>add</button>
       </form>
     </>
