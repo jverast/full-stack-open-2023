@@ -7,10 +7,8 @@ const getAll = async (): Promise<NonSensitiveDiaryValues[]> => {
   return response.data;
 };
 
-const createDiary = async (
-  diaryFormValues: DiaryFormValues
-): Promise<Diary> => {
-  const response = await axios.post(`${apiBaseUrl}/diaries`, diaryFormValues);
+const createDiary = async (diary: DiaryFormValues): Promise<Diary> => {
+  const response = await axios.post(`${apiBaseUrl}/diaries`, diary);
   return response.data;
 };
 

@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 
 import { NonSensitiveDiaryValues } from './types';
-import { apiBaseUrl } from './constants';
 
 import diaryService from './services/diaryService';
 import DiaryList from './components/DiaryList';
+import AddDiaryForm from './components/AddDiaryForm';
 
 const App = () => {
   const [diaries, setDiaries] = useState<NonSensitiveDiaryValues[]>([]);
 
   useEffect(() => {
-    void axios.get<void>(`${apiBaseUrl}/ping`);
-
     const fetchDiaryList = async () => {
       const diaries = await diaryService.getAll();
       setDiaries(diaries);
@@ -23,6 +20,7 @@ const App = () => {
 
   return (
     <div className="diary">
+      <AddDiaryForm diaries={diaries} setDiaries={setDiaries} />
       <DiaryList diaries={diaries} />
     </div>
   );
