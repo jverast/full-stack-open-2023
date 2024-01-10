@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Patient } from '../../types';
 import { useParams } from 'react-router-dom';
 
-import patientService from '../../services/patients';
+import patientService from '../../services/patient';
 
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
@@ -37,12 +37,14 @@ const PatientDetails = () => {
         <div>ssn: {patient.ssn}</div>
         <div>occupation: {patient.occupation}</div>
       </div>
-      <div>
-        <h3>entries</h3>
-        {patient.entries.map((entry) => (
-          <PatientEntry entry={entry} />
-        ))}
-      </div>
+      {patient.entries.length > 0 && (
+        <div>
+          <h3>entries</h3>
+          {patient.entries.map((entry) => (
+            <PatientEntry entry={entry} />
+          ))}
+        </div>
+      )}
     </>
   );
 };
