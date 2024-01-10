@@ -6,6 +6,7 @@ import patientService from '../../services/patients';
 
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
+import PatientEntry from './PatientEntry';
 
 const PatientDetails = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -33,8 +34,14 @@ const PatientDetails = () => {
         </h2>
       </div>
       <div>
-        <div>ssh: {patient.ssn}</div>
+        <div>ssn: {patient.ssn}</div>
         <div>occupation: {patient.occupation}</div>
+      </div>
+      <div>
+        <h3>entries</h3>
+        {patient.entries.map((entry) => (
+          <PatientEntry entry={entry} />
+        ))}
       </div>
     </>
   );
