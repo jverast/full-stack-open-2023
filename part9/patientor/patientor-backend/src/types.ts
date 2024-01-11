@@ -66,10 +66,11 @@ export interface Patient {
   entries: Entry[];
 }
 
-// Define omit especial para uniones
-// type BetterOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
-// Define Entry sin la propiedad 'id'
-// type EntryWithoutId = BetterOmit<Entry, 'id'>;
-
 export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>;
 export type NewPatient = Omit<Patient, 'id' | 'entries'>;
+
+type BetterOmit<T, K extends string | number | symbol> = T extends unknown
+  ? Omit<T, K>
+  : never;
+export type NewEntry = BetterOmit<Entry, 'id'>;
+export type BaseEntryWithoutId = Omit<BaseEntry, 'id'>;
