@@ -1,38 +1,48 @@
 import { useState, SyntheticEvent } from 'react';
 import patientService from '../../services/patient';
-import { Entry, NewEntry } from '../../types';
+import { Diagnose, Entry, NewEntry } from '../../types';
 import axios from 'axios';
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
   Grid,
   InputLabel,
+  ListItemText,
   MenuItem,
   Select,
-  TextField
+  SelectChangeEvent,
+  TextField,
+  Typography
 } from '@mui/material';
 
 interface Props {
   id: string;
   handlePatient: (obj: Entry) => void;
   handleError: (str: string) => void;
+  diagnoses: Diagnose[];
 }
 
 type EntrySelected = 'HealthCheck' | 'Hospital' | 'OccupationalHealthcare';
 
-const EntryForm = ({ handlePatient, id, handleError }: Props) => {
+const EntryForm = ({ handlePatient, id, handleError, diagnoses }: Props) => {
   const [description, setDescription] = useState<string>('');
   const [date, setDate] = useState<string>('');
   const [specialist, setSpecialist] = useState<string>('');
-  const [diagnosisCodes, setDiagnosisCode] = useState<string>('');
+  const [diagnosisCodes, setDiagnosisCodes] = useState<string[]>([]);
 
+  // HealthCheck
   const [hcr, setHcr] = useState<string>('');
 
-  const [discharge, setDischarge] = useState<string>('');
+  // Hospital
+  const [dischargeDate, setDischargeDate] = useState<string>('');
+  const [dischargeCriteria, setDischargeCriteria] = useState<string>('');
 
+  // OccupationalHealthcare
   const [employerName, setEmployerName] = useState<string>('');
-  const [sickLeave, setSickLeave] = useState<string>('');
+  const [sickLeaveStartDate, setSickLeaveStartDate] = useState<string>('');
+  const [sickLeaveEndDate, setSickLeaveEndDate] = useState<string>('');
 
   const [entrySelected, setEntrySelected] =
     useState<EntrySelected>('HealthCheck');
@@ -45,9 +55,7 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
         description,
         date,
         specialist,
-        diagnosisCodes: diagnosisCodes
-          ? diagnosisCodes.split(',').map((d) => d.trim())
-          : undefined
+        diagnosisCodes: diagnosisCodes ? diagnosisCodes : undefined
       };
 
       let entryToFetch;
@@ -61,31 +69,34 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
       }
 
       if (entrySelected === 'Hospital') {
-        const [date, criteria] = discharge.split(',').map((v) => v.trim());
-
         entryToFetch = {
           type: 'Hospital',
           ...baseProperties,
-          discharge: { date, criteria }
+          discharge: { date: dischargeDate, criteria: dischargeCriteria }
         } as NewEntry;
       }
 
       if (entrySelected === 'OccupationalHealthcare') {
-        const [startDate, endDate] = sickLeave.split(',').map((v) => v.trim());
-
         entryToFetch = {
           type: 'OccupationalHealthcare',
           ...baseProperties,
           employerName,
-          sickLeave: (sickLeave && { startDate, endDate }) || undefined
+          sickLeave:
+            (sickLeaveStartDate &&
+              sickLeaveEndDate && {
+                startDate: sickLeaveStartDate,
+                endDate: sickLeaveEndDate
+              }) ||
+            undefined
         } as NewEntry;
       }
 
       if (!entryToFetch) return;
 
-      console.log(entryToFetch);
+      // console.log(entryToFetch);
       const newEntry = await patientService.createEntry(entryToFetch, id);
       handlePatient(newEntry);
+
       onCancel();
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
@@ -110,11 +121,20 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
     setDescription('');
     setDate('');
     setSpecialist('');
-    setDiagnosisCode('');
+    setDiagnosisCodes([]);
     setHcr('');
-    setDischarge('');
+    setDischargeDate('');
+    setDischargeCriteria('');
     setEmployerName('');
-    setSickLeave('');
+    setSickLeaveStartDate('');
+    setSickLeaveEndDate('');
+  };
+
+  const handleDiagnosisChange = (
+    event: SelectChangeEvent<typeof diagnosisCodes>
+  ) => {
+    const value = event.target.value;
+    setDiagnosisCodes(typeof value === 'string' ? value.split(',') : value);
   };
 
   return (
@@ -122,7 +142,7 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
       <h3>
         New <em>{entrySelected}</em> entry
       </h3>
-      <FormControl>
+      <FormControl sx={{ marginBottom: '.5rem' }}>
         <InputLabel id="entry-select">Entry Selected</InputLabel>
         <Select
           labelId="entry-select"
@@ -146,6 +166,7 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
               variant="standard"
               fullWidth
               label="Description"
+              required
               value={description}
               onChange={({ target }) => setDescription(target.value)}
             />
@@ -154,7 +175,9 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
             <TextField
               variant="standard"
               fullWidth
-              label="Date"
+              type="date"
+              label=" "
+              hiddenLabel
               value={date}
               onChange={({ target }) => setDate(target.value)}
             />
@@ -163,25 +186,42 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
             <TextField
               variant="standard"
               fullWidth
+              required
               label="Specialist"
               value={specialist}
               onChange={({ target }) => setSpecialist(target.value)}
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              variant="standard"
-              fullWidth
-              label="Diagnosis Codes"
-              value={diagnosisCodes}
-              onChange={({ target }) => setDiagnosisCode(target.value)}
-            />
+            <div>
+              <FormControl sx={{ width: 300 }} style={{ marginTop: '1rem' }}>
+                <Typography sx={{ color: 'rgb(118, 118, 118)' }}>
+                  Diagnosis Codes
+                </Typography>
+                <Select
+                  labelId="demo-multiple-checkbox-label"
+                  id="demo-multiple-checkbox"
+                  multiple
+                  value={diagnosisCodes}
+                  onChange={handleDiagnosisChange}
+                  renderValue={(selected) => selected.join(', ')}
+                >
+                  {diagnoses.map((d) => (
+                    <MenuItem key={d.code} value={d.code}>
+                      <Checkbox checked={diagnosisCodes.indexOf(d.code) > -1} />
+                      <ListItemText primary={d.code} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
           </Grid>
           {entrySelected === 'HealthCheck' && (
             <Grid item xs={12}>
               <TextField
                 variant="standard"
                 fullWidth
+                required
                 label="Health Check Rating"
                 value={hcr}
                 onChange={({ target }) => setHcr(target.value)}
@@ -190,13 +230,29 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
           )}
           {entrySelected === 'Hospital' && (
             <Grid item xs={12}>
-              <TextField
-                variant="standard"
-                fullWidth
-                label="Discharge"
-                value={discharge}
-                onChange={({ target }) => setDischarge(target.value)}
-              />
+              <Typography
+                sx={{ marginTop: '1rem', color: 'rgb(118, 118, 118)' }}
+              >
+                Discharge
+              </Typography>
+              <div style={{ width: '98.5%', marginLeft: 'auto' }}>
+                <TextField
+                  variant="standard"
+                  fullWidth
+                  label=" "
+                  type="date"
+                  value={dischargeDate}
+                  onChange={({ target }) => setDischargeDate(target.value)}
+                />
+                <TextField
+                  variant="standard"
+                  fullWidth
+                  required
+                  label="Criteria"
+                  value={dischargeCriteria}
+                  onChange={({ target }) => setDischargeCriteria(target.value)}
+                />
+              </div>
             </Grid>
           )}
           {entrySelected === 'OccupationalHealthcare' && (
@@ -205,19 +261,56 @@ const EntryForm = ({ handlePatient, id, handleError }: Props) => {
                 <TextField
                   variant="standard"
                   fullWidth
+                  required
                   label="Employer Name"
                   value={employerName}
                   onChange={({ target }) => setEmployerName(target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  variant="standard"
-                  fullWidth
-                  label="Sick Leave"
-                  value={sickLeave}
-                  onChange={({ target }) => setSickLeave(target.value)}
-                />
+                <Typography
+                  sx={{ marginTop: '1rem', color: 'rgb(118, 118, 118)' }}
+                >
+                  Sick Leave
+                </Typography>
+                <div style={{ width: '98.5%', marginLeft: 'auto' }}>
+                  <Typography
+                    sx={{
+                      marginTop: '1rem',
+                      marginBottom: '-1rem',
+                      color: 'rgb(118, 118, 118)'
+                    }}
+                  >
+                    Start
+                  </Typography>
+                  <TextField
+                    variant="standard"
+                    fullWidth
+                    label=" "
+                    type="date"
+                    value={sickLeaveStartDate}
+                    onChange={({ target }) =>
+                      setSickLeaveStartDate(target.value)
+                    }
+                  />
+                  <Typography
+                    sx={{
+                      marginTop: '1rem',
+                      marginBottom: '-1rem',
+                      color: 'rgb(118, 118, 118)'
+                    }}
+                  >
+                    End
+                  </Typography>
+                  <TextField
+                    variant="standard"
+                    fullWidth
+                    label=" "
+                    type="date"
+                    value={sickLeaveEndDate}
+                    onChange={({ target }) => setSickLeaveEndDate(target.value)}
+                  />
+                </div>
               </Grid>
             </>
           )}

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Entry, Patient } from '../../types';
+import { Diagnose, Entry, Patient } from '../../types';
 import { useParams } from 'react-router-dom';
 
 import patientService from '../../services/patient';
+import diagnoseService from '../../services/diagnose';
 
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
@@ -21,6 +22,8 @@ const EntryContainer = styled.div`
 const PatientDetails = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [message, setMessage] = useState<string>('');
+  const [diagnoses, setDiagnoses] = useState<Diagnose[] | null>(null);
+
   const { id } = useParams();
 
   useEffect(() => {
@@ -33,6 +36,15 @@ const PatientDetails = () => {
 
     fetchPatient();
   }, [id]);
+
+  useEffect(() => {
+    const fetchDiagnoses = async () => {
+      const diagnoses = await diagnoseService.getAll();
+      setDiagnoses(diagnoses);
+    };
+
+    fetchDiagnoses();
+  }, []);
 
   const handlePatient = (newEntry: Entry): void => {
     if (!patient) return;
@@ -48,7 +60,7 @@ const PatientDetails = () => {
     }, 5000);
   };
 
-  if (!patient || !id) return null;
+  if (!patient || !id || !diagnoses) return null;
 
   return (
     <>
@@ -66,6 +78,7 @@ const PatientDetails = () => {
       <EntryForm
         handlePatient={handlePatient}
         handleError={handleError}
+        diagnoses={diagnoses}
         id={id}
       />
       {patient.entries.length > 0 && (
@@ -73,7 +86,11 @@ const PatientDetails = () => {
           <h3>entries</h3>
           <EntryContainer>
             {patient.entries.map((entry) => (
-              <EntryDetails key={entry.id} entry={entry} />
+              <EntryDetails
+                key={entry.id}
+                entry={entry}
+                diagnoses={diagnoses}
+              />
             ))}
           </EntryContainer>
         </div>
