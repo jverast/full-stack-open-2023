@@ -14,7 +14,7 @@ interface Props {
 const Entry = styled.div`
   border: thin solid;
   border-radius: 4px;
-  padding: 5px;
+  padding: 0.65rem;
   line-height: 1.25;
 `;
 
@@ -43,9 +43,9 @@ const HealthCheck = ({ entry, diagnoses }: Props) => {
       <div>
         <em>{entry.description}</em>
       </div>
-      {entry.diagnosisCodes && (
+      {entry.diagnosisCodes && entry.diagnosisCodes.length > 0 && (
         <ul>
-          {entry?.diagnosisCodes?.map((d) => (
+          {entry.diagnosisCodes.map((d) => (
             <li key={d}>
               {d} {diagnoses?.find((dn) => dn.code === d)?.name}
             </li>

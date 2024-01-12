@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Patient } from '../../types';
+import { Entry, Patient } from '../../types';
 import { useParams } from 'react-router-dom';
 
 import patientService from '../../services/patient';
@@ -9,6 +9,8 @@ import MaleIcon from '@mui/icons-material/Male';
 import EntryDetails from './Entry';
 
 import styled from '@emotion/styled';
+import EntryForm from './EntryForm';
+import Notify from '../Notify';
 
 const EntryContainer = styled.div`
   display: flex;
@@ -18,20 +20,35 @@ const EntryContainer = styled.div`
 
 const PatientDetails = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [message, setMessage] = useState<string>('');
   const { id } = useParams();
 
   useEffect(() => {
     if (!id) return;
 
     const fetchPatient = async (): Promise<void> => {
-      const patient = await patientService.getEntry(id);
+      const patient = await patientService.getPatient(id);
       setPatient(patient);
     };
 
     fetchPatient();
   }, [id]);
 
-  if (!patient) return null;
+  const handlePatient = (newEntry: Entry): void => {
+    if (!patient) return;
+
+    // console.log(newEntry);
+    setPatient({ ...patient, entries: [...patient.entries, newEntry] });
+  };
+
+  const handleError = (text: string): void => {
+    setMessage(text);
+    setTimeout(() => {
+      setMessage('');
+    }, 5000);
+  };
+
+  if (!patient || !id) return null;
 
   return (
     <>
@@ -45,6 +62,12 @@ const PatientDetails = () => {
         <div>ssn: {patient.ssn}</div>
         <div>occupation: {patient.occupation}</div>
       </div>
+      <Notify message={message} />
+      <EntryForm
+        handlePatient={handlePatient}
+        handleError={handleError}
+        id={id}
+      />
       {patient.entries.length > 0 && (
         <div>
           <h3>entries</h3>

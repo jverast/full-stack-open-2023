@@ -11,7 +11,7 @@ interface Props {
 const Entry = styled.div`
   border: thin solid;
   border-radius: 4px;
-  padding: 5px;
+  padding: 0.65rem;
   line-height: 1.25;
 `;
 

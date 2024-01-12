@@ -73,4 +73,3 @@ type BetterOmit<T, K extends string | number | symbol> = T extends unknown
   ? Omit<T, K>
   : never;
 export type NewEntry = BetterOmit<Entry, 'id'>;
-export type BaseEntryWithoutId = Omit<BaseEntry, 'id'>;

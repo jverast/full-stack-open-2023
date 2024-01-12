@@ -5,8 +5,7 @@ import {
   HealthCheckRating,
   NewEntry,
   NewPatient,
-  SickLeave,
-  BaseEntryWithoutId
+  SickLeave
 } from './types';
 
 const isString = (text: unknown): text is string => {
@@ -39,7 +38,7 @@ const isHealthCheckRating = (param: number): param is HealthCheckRating => {
 
 const parseName = (name: unknown): string => {
   if (!isString(name)) {
-    throw new Error(`Incorrect or missing name: '${name}'`);
+    throw new Error(`Incorrect or missing name ${name}`);
   }
   return name;
 };
@@ -176,7 +175,7 @@ const toNewEntry = (obj: unknown): NewEntry => {
     'date' in obj &&
     'specialist' in obj
   ) {
-    const commonProperties: BaseEntryWithoutId = {
+    const commonProperties = {
       description: parseDescription(obj.description),
       date: parseDate(obj.date),
       specialist: parseSpecialist(obj.specialist)
